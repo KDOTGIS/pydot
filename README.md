@@ -1,4 +1,4 @@
 pydot
 =====
 
-GIS for the Kasnas Department of Transportation 
+GIS for the Kansas Department of Transportation 
