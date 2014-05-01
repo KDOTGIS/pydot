@@ -32,7 +32,7 @@ def setupEnv():
     MakeTableView_management(connection1+"GIS_CITY", "GIS_CITY")
     MakeTableView_management(laneclass, "LaneClass")
     MakeRouteEventLayer_lr("cmlrs","LRS_KEY","GIS_CITY","LRS_KEY LINE BEG_CMP END_CMP","GIS_BASED_CCL","#","ERROR_FIELD","NO_ANGLE_FIELD","NORMAL","ANGLE","LEFT","POINT")
-    OverlayRouteEvents_lr(connection1+"CCL_Resolution","LRS_KEY LINE BEG_CNTY_LOGMILE END_CNTY_LOGMILE",laneclass,"LRS_KEY LINE BCMP ECMP","UNION",connection1+"CCL_LANE_CLASS_OVERLAY","LRS_KEY LINE BEG_CNTY_LOGMILE END_CNTY_LOGMILE","NO_ZERO","FIELDS","INDEX")
+    OverlayRouteEvents_lr(connection1+"CCL_Resolution","LRS_KEY LINE BEG_CNTY_LOGMILE END_CNTY_LOGMILE",laneclass,"LRS_KEY LINE BCMP ECMP","INTERSECT",connection1+"CCL_LANE_CLASS_OVERLAY","LRS_KEY LINE BEG_CNTY_LOGMILE END_CNTY_LOGMILE","NO_ZERO","FIELDS","INDEX")
     print "create Route Layer specific to City Connecting Link locations"    
     FeatureClassToFeatureClass_conversion("City_Connecting_Links", connection0, "CITY_CONNECTING_LINK_CENTERLINE")
     LocateFeaturesAlongRoutes_lr(connection1+"CITY_CONNECTING_LINK_CENTERLINE",stateroutelyr,"LRS_ROUTE","0 Meters",connection1+"CCL_STATE_LRS_tbl","LRS_ROUTE LINE BEG_STATE_LOGMILE END_STATE_LOGMILE","FIRST","DISTANCE","ZERO","FIELDS","M_DIRECTON")
@@ -78,7 +78,7 @@ def calibrationCCL():
     CalculateField_management(connection1+NewRoute,"NETWORKDATE","datetime.datetime.now( )","PYTHON_9.3","#")
     MakeFeatureLayer_management(connection1+"CCL_LRS_ROUTE", NewRoute)
     
-def GenerateReport():
+def Maintenance():
     print "reference maintenance agreement table"
     MakeTableView_management(maintenance, "Maint_tview")
     MakeRouteEventLayer_lr(cntyroutelyr,"LRS_KEY", "Maint_tview","LRSKEY LINE BEGMILEPOST END_MP","Maintenance_Events_CNTY","#","ERROR_FIELD","ANGLE_FIELD","NORMAL","ANGLE","LEFT","POINT")
@@ -86,18 +86,22 @@ def GenerateReport():
         Delete_management(connection1+"MAINTENANCE_CCL")
     LocateFeaturesAlongRoutes_lr("Maintenance_Events_CNTY",connection1+"CCL_LRS_ROUTE",NewRouteKey,"1 Feet",connection1+"MAINTENANCE_CCL","CCL_LRS LINE CCL_BEGIN CCL_END","ALL","DISTANCE","ZERO","FIELDS","M_DIRECTON")
     print "show lane classification referenced to city connecting link LRS"
+    
+def LaneClass():    
     MakeFeatureLayer_management(laneclass, 'LNCL', "LANE_DIRECTION in ( 'EB' , 'NB' )")
     LocateFeaturesAlongRoutes_lr("LNCL",connection1+"CCL_LRS_ROUTE",NewRouteKey,"#",connection1+"LANECLASS_CCL","CCL_LRS LINE CCL_BEGIN CCL_END","ALL","DISTANCE","ZERO","FIELDS","M_DIRECTON")
     AddField_management(connection1+"LANECLASS_CCL", "Lanes", "LONG")
     MakeTableView_management(laneclass, "LANECLASS_CCL_tbl", "LANE_DIRECTION in ( 'EB' , 'NB' )")
     CalculateField_management(connection1+"LANECLASS_CCL","Lanes", 'Left([LNCL_CLS_ID_DESC],1)', "VB" )
+
+def Report():
     OverlayRouteEvents_lr(connection1+"MAINTENANCE_CCL","CCL_LRS LINE CCL_BEGIN CCL_END",connection1+"LANECLASS_CCL","CCL_LRS LINE CCL_BEGIN CCL_END","UNION",connection1+"CCL_Report_M","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","NO_ZERO","FIELDS","INDEX")
     DissolveRouteEvents_lr(connection1+"CCL_Report_M","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","CITYNO;MAINT_DESC;CITY_NAME;Lanes",connection1+"CCL_Report_D","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","CONCATENATE","INDEX")
     #cleanup border errors - make feature layers based on City, city number, and CCLLRS and delete where they are not consistent between Maintenance and Resolution sections
     MakeTableView_management(connection1+"CCL_Report", "Report_Clean1", "CCL_LRS2 <> CCL_LRS")
     DeleteRows_management("Report_Clean1")
     LocateFeaturesAlongRoutes_lr(LineFeatureClass, connection1+"CCL_LRS_ROUTE",NewRouteKey,"#",connection1+"RES_SECTION_CCL","CCL_LRS LINE CCL_BEGIN CCL_END","ALL","DISTANCE","ZERO","FIELDS","M_DIRECTON")
-    OverlayRouteEvents_lr(connection1+"RES_SECTION_CCL","CCL_LRS LINE CCL_BEGIN CCL_END",connection1+"CCL_Report_D","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","UNION",connection1+"CCL_Report","CCL_LRS LINE CCL_BEGIN CCL_END","NO_ZERO","FIELDS","INDEX")   
+    OverlayRouteEvents_lr(connection1+"RES_SECTION_CCL","CCL_LRS LINE CCL_BEGIN CCL_END",connection1+"CCL_Report_D","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","INTERSECT",connection1+"CCL_Report","CCL_LRS LINE CCL_BEGIN CCL_END","NO_ZERO","FIELDS","INDEX")   
     MakeRouteEventLayer_lr(connection1+"CCL_LRS_ROUTE", "CCL_LRS",connection1+"CCL_Report","CCL_LRS LINE CCL_BEGIN CCL_END","City Connecting Links Mapping","#","ERROR_FIELD","NO_ANGLE_FIELD","NORMAL","ANGLE","LEFT","POINT")
     print "add mapping fields for lane miles"
     AddField_management("City Connecting Links Mapping", "CenterlineMiles", "DOUBLE")
@@ -117,7 +121,7 @@ if __name__ == '__main__':
 #    CityConnectingLink()
     setupEnv()
     calibrationCCL()
-    #GenerateReport()
+    GenerateReport()
     
     print "ended at "+ str(datetime.datetime.now())
     
