@@ -89,7 +89,7 @@ def Maintenance():
     
 def LaneClass():    
     MakeFeatureLayer_management(laneclass, 'LNCL', "LANE_DIRECTION in ( 'EB' , 'NB' )")
-    LocateFeaturesAlongRoutes_lr("LNCL",connection1+"CCL_LRS_ROUTE",NewRouteKey,"#",connection1+"LANECLASS_CCL","CCL_LRS LINE CCL_BEGIN CCL_END","ALL","DISTANCE","ZERO","FIELDS","M_DIRECTON")
+    LocateFeaturesAlongRoutes_lr("LNCL",connection1+"CCL_LRS_ROUTE",NewRouteKey,"0.1 FEET",connection1+"LANECLASS_CCL","CCL_LRS LINE CCL_BEGIN CCL_END","ALL","DISTANCE","ZERO","FIELDS","M_DIRECTON")
     AddField_management(connection1+"LANECLASS_CCL", "Lanes", "LONG")
     MakeTableView_management(laneclass, "LANECLASS_CCL_tbl", "LANE_DIRECTION in ( 'EB' , 'NB' )")
     CalculateField_management(connection1+"LANECLASS_CCL","Lanes", 'Left([LNCL_CLS_ID_DESC],1)', "VB" )
