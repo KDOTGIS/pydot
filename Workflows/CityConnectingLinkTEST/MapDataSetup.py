@@ -5,7 +5,7 @@ udpated 5/1/2014
 '''
 #import data paths from config file.  If testing in ArcMap, run config first to set up environments
 try:
-    from config import ws, connection0, connection1, citylimits, stateroutelyr, cntyroutelyr, laneclass, maintenance, resolve, LineFeatureClass, ReferenceRoute, ReferenceRouteKey, NewRouteKey, NewBeg, NewEnd, NewRoute
+    from config import ws, connection0, connection1, citylimits, stateroutelyr, cntyroutelyr, laneclass, maintenance, resolve, LineFeatureClass, ReferenceRoute, ReferenceRouteKey, NewRouteKey, NewBeg, NewEnd, NewRoute, schema
 except:
     pass
 
@@ -48,8 +48,8 @@ def setupEnv():
 def calibrationCCL():
     
     print "deriving CCL LRS starting points and calibrations"
-    CCLEnd = "!CCL.DBO.CITY_CONNECTING_LINK_STATE.MAX_END_STATE_LOGMILE!- !CCL.DBO.CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!"
-    CCLBeg = "!CCL.DBO.CITY_CONNECTING_LINK_STATE.MIN_BEG_STATE_LOGMILE! - !CCL.DBO.CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!"
+    CCLEnd = "!"+schema+"CITY_CONNECTING_LINK_STATE.MAX_END_STATE_LOGMILE!- !"+schema+"CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!"
+    CCLBeg = "!"+schema+"CITY_CONNECTING_LINK_STATE.MIN_BEG_STATE_LOGMILE! - !"+schema+"CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!"
     MakeFeatureLayer_management(LineFeatureClass, "CITY_CONNECTING_LINK_RESET")
     resln = "CITY_CONNECTING_LINK_RESET"
     AddField_management(resln,"CCL_BEGIN", "DOUBLE", 12, 3)
@@ -59,22 +59,22 @@ def calibrationCCL():
     CalculateField_management(resln, "CCL_END", CCLEnd, "PYTHON")
     print "calibrating LRS - point calibration method"
     statecalpoints = stateroutelyr+"_Point"
-    Intersect_analysis("CCL.DBO.CITY_CONNECTING_LINK_STATE_D #;'Database Connections/SQL61_GIS_CANSYS_RO.sde/GIS_CANSYS.DBO.SMLRS_Point' #","Database Connections/SQL61_GEOADMIN_CCL.sde/CALIBRATION_POINTS_CCL","ALL","#","POINT")
+    intersects = [schema+r"CITY_CONNECTING_LINK_STATE_D", statecalpoints]
+    Intersect_analysis(intersects,connection0+"\CALIBRATION_POINTS_CCL","ALL","#","POINT")
     querystr = "Substring( CCL_LRS,4, 12)<> LRS_ROUTE"  
-    SelectLayerByAttribute_management("CCL.DBO.CALIBRATION_POINTS_CCL","NEW_SELECTION",querystr)
-    DeleteRows_management("CCL.DBO.CALIBRATION_POINTS_CCL")
+    SelectLayerByAttribute_management(""+schema+"CALIBRATION_POINTS_CCL","NEW_SELECTION",querystr)
+    DeleteRows_management(schema+"CALIBRATION_POINTS_CCL")
     
-    DeleteIdentical_management("CCL.DBO.CALIBRATION_POINTS_CCL","LRS_KEY;POINT_X;POINT_Y;POINT_M","#","0")
-    AddField_management("CCL.DBO.CITY_CONNECTING_LINK_STATE","CCL_BEGIN","DOUBLE","#","#","#","#","NULLABLE","NON_REQUIRED","#")
-    AddField_management("CCL.DBO.CITY_CONNECTING_LINK_STATE","CCL_BEGIN","DOUBLE","#","#","#","#","NULLABLE","NON_REQUIRED","#")
-    AddJoin_management("CCL.DBO.CITY_CONNECTING_LINK_STATE","CCL_LRS","CCL.DBO.CITY_CONNECTING_LINK_STATE_D","CCL_LRS","KEEP_ALL")
-    CalculateField_management("CCL.DBO.CITY_CONNECTING_LINK_STATE","CCL.DBO.CITY_CONNECTING_LINK_STATE.CCL_BEGIN","!CCL.DBO.CITY_CONNECTING_LINK_STATE.MIN_BEG_STATE_LOGMILE!- !CCL.DBO.CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!","PYTHON","#")
-    CalculateField_management("CCL.DBO.CITY_CONNECTING_LINK_STATE","CCL.DBO.CITY_CONNECTING_LINK_STATE.CCL_END","!CCL.DBO.CITY_CONNECTING_LINK_STATE.MAX_END_STATE_LOGMILE!- !CCL.DBO.CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!","PYTHON","#")
-    inprops = str(ReferenceRouteKey +" POINT MEASURE")
+    DeleteIdentical_management(""+schema+"CALIBRATION_POINTS_CCL","LRS_KEY;POINT_X;POINT_Y;POINT_M","#","0")
+    AddField_management(""+schema+"CITY_CONNECTING_LINK_STATE","CCL_BEGIN","DOUBLE","#","#","#","#","NULLABLE","NON_REQUIRED","#")
+    AddField_management(""+schema+"CITY_CONNECTING_LINK_STATE","CCL_BEGIN","DOUBLE","#","#","#","#","NULLABLE","NON_REQUIRED","#")
+    AddJoin_management(""+schema+"CITY_CONNECTING_LINK_STATE","CCL_LRS",""+schema+"CITY_CONNECTING_LINK_STATE_D","CCL_LRS","KEEP_ALL")
+    CalculateField_management(""+schema+"CITY_CONNECTING_LINK_STATE",""+schema+"CITY_CONNECTING_LINK_STATE.CCL_BEGIN","!"+schema+"CITY_CONNECTING_LINK_STATE.MIN_BEG_STATE_LOGMILE!- !"+schema+"CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!","PYTHON","#")
+    CalculateField_management(""+schema+"CITY_CONNECTING_LINK_STATE",""+schema+"CITY_CONNECTING_LINK_STATE.CCL_END","!"+schema+"CITY_CONNECTING_LINK_STATE.MAX_END_STATE_LOGMILE!- !"+schema+"CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!","PYTHON","#")
     AddField_management(connection1+"CALIBRATION_POINTS_CCL","CCL_MEASURE", "DOUBLE", 12, 3)
-    CalculateField_management("CCL.DBO.CALIBRATION_POINTS_CCL","CCL_MEASURE","!POINT_M!- !MIN_BEG_STATE_LOGMILE!","PYTHON","#")
+    CalculateField_management(""+schema+"CALIBRATION_POINTS_CCL","CCL_MEASURE","!POINT_M!- !MIN_BEG_STATE_LOGMILE!","PYTHON","#")
     CreateRoutes_lr(LineFeatureClass,NewRouteKey,connection1+NewRoute+"base","TWO_FIELDS",NewBeg, NewEnd,"UPPER_LEFT","1","0","IGNORE","INDEX")
-    CalibrateRoutes_lr("Database Connections/SQL61_GEOADMIN_CCL.sde/CCL.DBO.CCL_LRS_ROUTEbase","CCL_LRS","Database Connections/SQL61_GEOADMIN_CCL.sde/CCL.DBO.CALIBRATION_POINTS_CCL","CCL_LRS","CCL_MEASURE","Database Connections/SQL61_GEOADMIN_CCL.sde/CCL.DBO.CCL_LRS_ROUTE","DISTANCE","1 Feet","BETWEEN","NO_BEFORE","NO_AFTER","IGNORE","KEEP","INDEX")
+    CalibrateRoutes_lr(connection0+"/"+schema+"CCL_LRS_ROUTEbase","CCL_LRS",connection0+"/"+schema+"CALIBRATION_POINTS_CCL","CCL_LRS","CCL_MEASURE",connection0+"/"+schema+"CCL_LRS_ROUTE","DISTANCE","1 Feet","BETWEEN","NO_BEFORE","NO_AFTER","IGNORE","KEEP","INDEX")
     AddField_management(connection1+NewRoute, "NETWORKDATE", "DATE")
     CalculateField_management(connection1+NewRoute,"NETWORKDATE","datetime.datetime.now( )","PYTHON_9.3","#")
     MakeFeatureLayer_management(connection1+"CCL_LRS_ROUTE", NewRoute)
