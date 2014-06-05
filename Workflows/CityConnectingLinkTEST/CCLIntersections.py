@@ -6,7 +6,7 @@ Created on Oct 31, 2013
 from arcpy import MakeFeatureLayer_management, Intersect_analysis, LocateFeaturesAlongRoutes_lr, MakeRouteEventLayer_lr, env, AddField_management, CalculateField_management, AddJoin_management, RemoveJoin_management 
 
 try:
-    from config import nonstate, connection1, interchange, NewRouteKey, NewRoute, ws, citylimits
+    from config import nonstate, connection1, interchange, NewRouteKey, NewRoute, ws, citylimits, schema
 except:
     pass
 
@@ -25,7 +25,7 @@ def NONSTATE_INT():
     MakeRouteEventLayer_lr("CCL_LRS_ROUTE",NewRouteKey,connection1+"INTR_CCL_NS","CCL_LRS POINT MEASURE","INTR_CCL_NS Events","#","ERROR_FIELD","ANGLE_FIELD","NORMAL","ANGLE","LEFT","POINT")
     AddField_management("INTR_CCL_NS Events", "CITY", "TEXT", "#", "#", "100")
     AddJoin_management("INTR_CCL_NS Events", "CITYNUMBER", citylimits, "CITYNUMBER")
-    CalculateField_management("INTR_CCL_NS Events", "CCL.DBO.INTR_CCL_NS_Features.CITY", "!GIS_DEV.CITY_LIMITS.CITY!", "PYTHON_9.3")    
+    CalculateField_management("INTR_CCL_NS Events", schema+"INTR_CCL_NS_Features.CITY", "!GIS_DEV.CITY_LIMITS.CITY!", "PYTHON_9.3")    
     RemoveJoin_management("INTR_CCL_NS Events", "#")
    
 def STATE_INT():    
@@ -37,10 +37,12 @@ def STATE_INT():
     AddField_management("INTR_CCL_Events", "CITYNUMBER", "Long", "#", "#", "#")
     CalculateField_management("INTR_CCL_Events", "CITYNUMBER", "int(!CCL_LRS![0:3])", "PYTHON_9.3")  
     AddJoin_management("INTR_CCL_Events", "CITYNUMBER", citylimits, "CITYNUMBER")
-    CalculateField_management("INTR_CCL_Events", "CCL.DBO.INTR_CCL_Features.CITY", "!GIS_DEV.CITY_LIMITS.CITY!", "PYTHON_9.3")    
+    CalculateField_management("INTR_CCL_Events", schema+"INTR_CCL_Features.CITY", "!GIS_DEV.CITY_LIMITS.CITY!", "PYTHON_9.3")    
     RemoveJoin_management("INTR_CCL_Events", "#")
     
-NONSTATE_INT()
-STATE_INT()
+    
+if __name__ == '__main__':    
+    NONSTATE_INT()
+    STATE_INT()
 
 print "completed"

@@ -5,12 +5,12 @@ udpated 5/1/2014
 '''
 #import data paths from config file.  If testing in ArcMap, run config first to set up environments
 try:
-    from config import ws, connection0, connection1, citylimits, stateroutelyr, cntyroutelyr, laneclass, maintenance, resolve, LineFeatureClass, ReferenceRoute, ReferenceRouteKey, NewRouteKey, NewBeg, NewEnd, NewRoute, schema
+    from config import ws, connection0, connection1, citylimits, stateroutelyr, cntyroutelyr, laneclass, maintenance, resolve, LineFeatureClass, NewRouteKey, NewBeg, NewEnd, NewRoute, schema
 except:
     pass
 
 
-from arcpy import env, Intersect_analysis, SelectLayerByAttribute_management, DissolveRouteEvents_lr, DeleteRows_management, CreateRoutes_lr, CalibrateRoutes_lr, DeleteIdentical_management, Exists, AddJoin_management, Delete_management, FeatureClassToFeatureClass_conversion, MakeFeatureLayer_management, MakeTableView_management, Dissolve_management, AddField_management, CalculateField_management, LocateFeaturesAlongRoutes_lr, MakeRouteEventLayer_lr, OverlayRouteEvents_lr
+from arcpy import env, Intersect_analysis, SelectLayerByAttribute_management, DissolveRouteEvents_lr, DeleteRows_management, CreateRoutes_lr, ChangePrivileges_management, CalibrateRoutes_lr, DeleteIdentical_management, Exists, AddJoin_management, Delete_management, FeatureClassToFeatureClass_conversion, MakeFeatureLayer_management, MakeTableView_management, Dissolve_management, AddField_management, CalculateField_management, LocateFeaturesAlongRoutes_lr, MakeRouteEventLayer_lr, OverlayRouteEvents_lr
 import datetime
 env.workspace = ws
 env.overwriteOutput = True
@@ -59,22 +59,28 @@ def calibrationCCL():
     CalculateField_management(resln, "CCL_END", CCLEnd, "PYTHON")
     print "calibrating LRS - point calibration method"
     statecalpoints = stateroutelyr+"_Point"
-    intersects = [schema+r"CITY_CONNECTING_LINK_STATE_D", statecalpoints]
-    Intersect_analysis(intersects,connection0+"\CALIBRATION_POINTS_CCL","ALL","#","POINT")
+    print statecalpoints
+    MakeFeatureLayer_management(statecalpoints, "smlrs_pt")
+    print connection1+"CITY_CONNECTING_LINK_STATE_D"
+    MakeFeatureLayer_management(connection1+"CITY_CONNECTING_LINK_STATE_D", "dissolved_res_sects")
+    intersects = ["dissolved_res_sects", "smlrs_pt"]
+    Intersect_analysis(intersects,connection0+"CALIBRATION_POINTS_CCL","ALL","#","POINT")
+    print connection1+"CALIBRATION_POINTS_CCL"
+    MakeFeatureLayer_management(connection1+"CALIBRATION_POINTS_CCL", "Calibrators")
     querystr = "Substring( CCL_LRS,4, 12)<> LRS_ROUTE"  
-    SelectLayerByAttribute_management(""+schema+"CALIBRATION_POINTS_CCL","NEW_SELECTION",querystr)
-    DeleteRows_management(schema+"CALIBRATION_POINTS_CCL")
-    
-    DeleteIdentical_management(""+schema+"CALIBRATION_POINTS_CCL","LRS_KEY;POINT_X;POINT_Y;POINT_M","#","0")
-    AddField_management(""+schema+"CITY_CONNECTING_LINK_STATE","CCL_BEGIN","DOUBLE","#","#","#","#","NULLABLE","NON_REQUIRED","#")
-    AddField_management(""+schema+"CITY_CONNECTING_LINK_STATE","CCL_BEGIN","DOUBLE","#","#","#","#","NULLABLE","NON_REQUIRED","#")
-    AddJoin_management(""+schema+"CITY_CONNECTING_LINK_STATE","CCL_LRS",""+schema+"CITY_CONNECTING_LINK_STATE_D","CCL_LRS","KEEP_ALL")
-    CalculateField_management(""+schema+"CITY_CONNECTING_LINK_STATE",""+schema+"CITY_CONNECTING_LINK_STATE.CCL_BEGIN","!"+schema+"CITY_CONNECTING_LINK_STATE.MIN_BEG_STATE_LOGMILE!- !"+schema+"CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!","PYTHON","#")
-    CalculateField_management(""+schema+"CITY_CONNECTING_LINK_STATE",""+schema+"CITY_CONNECTING_LINK_STATE.CCL_END","!"+schema+"CITY_CONNECTING_LINK_STATE.MAX_END_STATE_LOGMILE!- !"+schema+"CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!","PYTHON","#")
+    SelectLayerByAttribute_management("Calibrators","NEW_SELECTION",querystr)
+    DeleteRows_management("Calibrators")
+    MakeFeatureLayer_management(connection1+"CITY_CONNECTING_LINK_STATE", "CCL_sections")
+    DeleteIdentical_management("Calibrators","LRS_KEY;POINT_X;POINT_Y;POINT_M","#","0")
+    AddField_management("CCL_sections","CCL_BEGIN","DOUBLE","#","#","#","#","NULLABLE","NON_REQUIRED","#")
+    AddField_management("CCL_sections","CCL_BEGIN","DOUBLE","#","#","#","#","NULLABLE","NON_REQUIRED","#")
+    AddJoin_management("CCL_sections","CCL_LRS","dissolved_res_sects","CCL_LRS","KEEP_ALL")
+    CalculateField_management("CCL_sections",schema+"CITY_CONNECTING_LINK_STATE.CCL_BEGIN","!"+schema+"CITY_CONNECTING_LINK_STATE.MIN_BEG_STATE_LOGMILE!- !"+schema+"CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!","PYTHON","#")
+    CalculateField_management("CCL_sections",schema+"CITY_CONNECTING_LINK_STATE.CCL_END","!"+schema+"CITY_CONNECTING_LINK_STATE.MAX_END_STATE_LOGMILE!- !"+schema+"CITY_CONNECTING_LINK_STATE_D.MIN_BEG_STATE_LOGMILE!","PYTHON","#")
     AddField_management(connection1+"CALIBRATION_POINTS_CCL","CCL_MEASURE", "DOUBLE", 12, 3)
-    CalculateField_management(""+schema+"CALIBRATION_POINTS_CCL","CCL_MEASURE","!POINT_M!- !MIN_BEG_STATE_LOGMILE!","PYTHON","#")
+    CalculateField_management("Calibrators","CCL_MEASURE","!POINT_M!- !MIN_BEG_STATE_LOGMILE!","PYTHON","#")
     CreateRoutes_lr(LineFeatureClass,NewRouteKey,connection1+NewRoute+"base","TWO_FIELDS",NewBeg, NewEnd,"UPPER_LEFT","1","0","IGNORE","INDEX")
-    CalibrateRoutes_lr(connection0+"/"+schema+"CCL_LRS_ROUTEbase","CCL_LRS",connection0+"/"+schema+"CALIBRATION_POINTS_CCL","CCL_LRS","CCL_MEASURE",connection0+"/"+schema+"CCL_LRS_ROUTE","DISTANCE","1 Feet","BETWEEN","NO_BEFORE","NO_AFTER","IGNORE","KEEP","INDEX")
+    CalibrateRoutes_lr(connection0+"/"+schema+"CCL_LRS_ROUTEbase","CCL_LRS",connection1+"CALIBRATION_POINTS_CCL","CCL_LRS","CCL_MEASURE",connection1+"CCL_LRS_ROUTE","DISTANCE","1 Feet","BETWEEN","NO_BEFORE","NO_AFTER","IGNORE","KEEP","INDEX")
     AddField_management(connection1+NewRoute, "NETWORKDATE", "DATE")
     CalculateField_management(connection1+NewRoute,"NETWORKDATE","datetime.datetime.now( )","PYTHON_9.3","#")
     MakeFeatureLayer_management(connection1+"CCL_LRS_ROUTE", NewRoute)
@@ -99,8 +105,9 @@ def Report():
     OverlayRouteEvents_lr(connection1+"MAINTENANCE_CCL","CCL_LRS LINE CCL_BEGIN CCL_END",connection1+"LANECLASS_CCL","CCL_LRS LINE CCL_BEGIN CCL_END","UNION",connection1+"CCL_Report_M","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","NO_ZERO","FIELDS","INDEX")
     DissolveRouteEvents_lr(connection1+"CCL_Report_M","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","CITYNO;MAINT_DESC;CITY_NAME;Lanes",connection1+"CCL_Report_D","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","CONCATENATE","INDEX")
     #cleanup border errors - make feature layers based on City, city number, and CCLLRS and delete where they are not consistent between Maintenance and Resolution sections
-    MakeTableView_management(connection1+"CCL_Report", "Report_Clean1", "CCL_LRS2 <> CCL_LRS")
-    DeleteRows_management("Report_Clean1")
+    if Exists(connection1+"CCL_Report"):
+        MakeTableView_management(connection1+"CCL_Report", "Report_Clean1", "CCL_LRS2 <> CCL_LRS")
+        DeleteRows_management("Report_Clean1")
     LocateFeaturesAlongRoutes_lr(LineFeatureClass, connection1+"CCL_LRS_ROUTE",NewRouteKey,"#",connection1+"RES_SECTION_CCL","CCL_LRS LINE CCL_BEGIN CCL_END","ALL","DISTANCE","ZERO","FIELDS","M_DIRECTON")
     OverlayRouteEvents_lr(connection1+"RES_SECTION_CCL","CCL_LRS LINE CCL_BEGIN CCL_END",connection1+"CCL_Report_D","CCL_LRS LINE CCL_MA_BEGIN CCL_MA_END","INTERSECT",connection1+"CCL_Report","CCL_LRS LINE CCL_BEGIN CCL_END","NO_ZERO","FIELDS","INDEX")   
     MakeRouteEventLayer_lr(connection1+"CCL_LRS_ROUTE", "CCL_LRS",connection1+"CCL_Report","CCL_LRS LINE CCL_BEGIN CCL_END","City Connecting Links Mapping","#","ERROR_FIELD","NO_ANGLE_FIELD","NORMAL","ANGLE","LEFT","POINT")
@@ -117,6 +124,14 @@ def Report():
     legendexp = 'str(!CCL_LRS![3]) +"-" + str(!CCL_LRS![6:9]).lstrip("0")+"........"+ str(!SUM_CenterlineMiles!)'
     MakeFeatureLayer_management(connection1+"CCL_LEGEND", 'LegendCalc')
     CalculateField_management("LegendCalc","CCL_LEGEND",legendexp,"PYTHON_9.3","#")
+    
+def ROPrivs():
+    ChangePrivileges_management(connection1+"CCL_Report", "Readonly", "GRANT")
+    ChangePrivileges_management(connection1+"MAINTENANCE_CCL", "Readonly", "GRANT")
+    ChangePrivileges_management(connection1+"CCL_Resolution", "Readonly", "GRANT")
+    ChangePrivileges_management(connection1+"CCL_LANE_CLASS_OVERLAY", "Readonly", "GRANT")
+    ChangePrivileges_management(connection1+"CCL_LEGEND", "Readonly", "GRANT")
+    
 
 if __name__ == '__main__':
 #    CityConnectingLink()
@@ -124,5 +139,6 @@ if __name__ == '__main__':
     calibrationCCL()
     Maintenance()
     LaneClass()
+    Report()
     print "ended at "+ str(datetime.datetime.now())
     
