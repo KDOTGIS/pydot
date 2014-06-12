@@ -15,7 +15,7 @@ def esrify():
 
 def SetEncoding():
     #this is not working  - use DBTune
-    SDEconnection = cx_Oracle.connect('sde/gisadmin@sdetest')
+    SDEconnection = cx_Oracle.connect('redacted')
     cursor = SDEconnection.cursor()
     SQLCode = "INSERT INTO SDE.DBTUNE (KEYWORD,PARAMETER_NAME,CONFIG_STRING) VALUES ('DEFAULTS', 'UNICODE_STRING ', 'FALSE')"
     cursor.execute(SQLCode)
@@ -71,7 +71,7 @@ def ListFCdb():
             print arcpy.GetMessages()        
 
 def ShowRegistered():
-    connection = cx_Oracle.connect('sde/gisadmin@sdetest')
+    connection = cx_Oracle.connect('redacted')
     cursor = connection.cursor()
     #cursor.execute("select c.f_table_schema, c.f_table_name, c.storage_type from SDE.geometry_columns c Where c.f_table_schema = 'SHARED'")
     cursor.execute("select f_table_name from SDE.geometry_columns Where f_table_schema = 'SHARED'")
