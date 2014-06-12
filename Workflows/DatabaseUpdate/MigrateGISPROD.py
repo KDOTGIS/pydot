@@ -26,7 +26,7 @@ def SetEncoding():
 
 def DBConns():
     #schemae is a list of the connection strings for the database owner user/password.  The db owner should match the first part of the DBC connection name.sde variable
-    schemae = ["city data", "shared gis", "countymaps cartography", "videolog video", "osm data"]
+    schemae = ["redacted"]
     for schema in schemae:
         pwd =  schema.split(" ")[1] 
         usr = schema.split(" ")[0]
