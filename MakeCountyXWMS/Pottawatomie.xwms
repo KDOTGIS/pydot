@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<BentleyWMSFile>
+    <VERSION>1.3</VERSION>
+    <URL>http://kdot3:YN8WP6MA@www.valtus.ca/views/wms</URL>
+    <REQUEST>
+        <VERSION>1.1.1</VERSION>
+        <SRS>EPSG:3857</SRS>
+        <LAYERS>0</LAYERS>
+        <STYLES />
+        <FORMAT>image/jpeg</FORMAT>
+        <TRANSPARENT>FALSE</TRANSPARENT>
+    </REQUEST>
+    <MAPEXTENT>
+        <BBOX>-10767770.4986,4739679.09401,-10690524.8598,4803137.13122</BBOX>
+    </MAPEXTENT>
+    <LayerList>
+        <LAYER TITLE="VCP" NAME="VCP"  ABSTRACT="An optimized layer that is a world mosaic of the best imagery in the Valtus archive. This Layer has been specifically designed to be used as a base imagery layer for both web and desktop applications." />
+    </LayerList>
+    <SERVICE>
+        <MAXWIDTH>1024</MAXWIDTH>
+        <MAXHEIGHT>1024</MAXHEIGHT>
+    </SERVICE>
+    <EditorData>
+        <RangeMethod>Manual</RangeMethod>
+        <LayerRange>Intersection</LayerRange>
+        <UseModelCoordSysUsefulRange>False</UseModelCoordSysUsefulRange>
+        <UseMapCoordSysUsefulRange>True</UseMapCoordSysUsefulRange>
+        <ExplicitSRS>True</ExplicitSRS>
+    </EditorData>
+</BentleyWMSFile>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<BentleyWMSFile>
+    <VERSION>1.3</VERSION>
+    <URL>http://dt00ar50:6080/arcgis/services/IMAGERY/NAIP_Kansas_2012_1m_NC/ImageServer/WMSServer</URL>
+    <REQUEST>
+        <VERSION>1.1.1</VERSION>
+        <SRS>EPSG:3857</SRS>
+        <LAYERS>0</LAYERS>
+        <STYLES />
+        <FORMAT>image/jpeg</FORMAT>
+        <TRANSPARENT>FALSE</TRANSPARENT>
+    </REQUEST>
+    <MAPEXTENT>
+        <BBOX>-11157297.7679,4504421.53323,-11082536.005,4567285.83628</BBOX>
+    </MAPEXTENT>
+    <LayerList>
+        <LAYER TITLE="IMAGERY/NAIP_Kansas_2012_1m_NC" NAME="0"  ABSTRACT="012 NAIP Natural Color Imagery for Kansas acquired between June 5, 2012 and June 24, 2012." />
+    </LayerList>
+    <SERVICE>
+        <MAXWIDTH>1024</MAXWIDTH>
+        <MAXHEIGHT>1024</MAXHEIGHT>
+    </SERVICE>
+    <EditorData>
+        <RangeMethod>Manual</RangeMethod>
+        <LayerRange>Intersection</LayerRange>
+        <UseModelCoordSysUsefulRange>False</UseModelCoordSysUsefulRange>
+        <UseMapCoordSysUsefulRange>True</UseMapCoordSysUsefulRange>
+        <ExplicitSRS>True</ExplicitSRS>
+    </EditorData>
+</BentleyWMSFile>

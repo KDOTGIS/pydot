@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<BentleyWMSFile>
+    <VERSION>1.3</VERSION>
+    <URL>http://dt00ar50:6080/arcgis/services/IMAGERY/NAIP_Kansas_2012_1m_NC/ImageServer/WMSServer</URL>
+    <REQUEST>
+        <VERSION>1.1.1</VERSION>
+        <SRS>EPSG:4326</SRS>
+        <LAYERS />
+        <STYLES />
+        <FORMAT>image/jpeg</FORMAT>
+        <TRANSPARENT>FALSE</TRANSPARENT>
+    </REQUEST>
+    <MAPEXTENT>
+        <BBOX>-180,-90,180,90</BBOX>
+    </MAPEXTENT>
+    <LayerList />
+    <SERVICE>
+        <MAXWIDTH>1024</MAXWIDTH>
+        <MAXHEIGHT>1024</MAXHEIGHT>
+    </SERVICE>
+    <EditorData>
+        <RangeMethod>Calculated</RangeMethod>
+        <LayerRange>Union</LayerRange>
+        <UseModelCoordSysUsefulRange>True</UseModelCoordSysUsefulRange>
+        <UseMapCoordSysUsefulRange>True</UseMapCoordSysUsefulRange>
+        <ExplicitSRS>False</ExplicitSRS>
+    </EditorData>
+</BentleyWMSFile>
