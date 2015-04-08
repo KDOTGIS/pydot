@@ -7,10 +7,6 @@ Moved to Production on Aug 20 2014
 modified on 11/25/2014 to handle metadata updating
 
 '''
-
-
-import arcpy
-#Import arcpy module
 import os, string
 from arcpy import mapping, Append_management,TruncateTable_management, Exists, ClearWorkspaceCache_management, env, ListDatasets, ListFeatureClasses, XSLTransform_conversion, MetadataImporter_conversion, Delete_management
 
@@ -18,7 +14,7 @@ def RemoveGpHistory_fd(sdeconn,remove_gp_history_xslt,out_xml):
     ClearWorkspaceCache_management()
     for fd in ListDatasets():
         env.workspace = sdeconn + os.sep + fd
-        for fc in arcpy.ListFeatureClasses():
+        for fc in ListFeatureClasses():
             
             name_xml = out_xml + os.sep + str(fc) + ".xml"
             #Process: XSLT Transformation
@@ -60,12 +56,15 @@ if __name__== "__main__":
 	mxd = mapping.MapDocument(r'D:\HNTB_GATEWAY\ProductionMOT\2014111401_GatewayExec.mxd')
 	TargetLT = sdeconn+r"\Gateway2015.GATEWAY_SPATIAL.LongTermApproved"
 	TargetST = sdeconn+r'\Gateway2015.Gateway_Spatial.ShortTermApproved'
-	arcpy.env.workspace = sdeconn
+	env.workspace = sdeconn
 	remove_gp_history_xslt = "D:\\Program Files (x86)\\ArcGIS\\Desktop10.1\\Metadata\\Stylesheets\\gpTools\\remove geoprocessing history.xslt"
 	out_xml = "D:\\XML_out"
 	if Exists(out_xml):
 		Delete_management("D:/XML_out","Folder")
+		print 'folder deleted'
 	os.mkdir(out_xml)
+	print 'folder created'
 	RemoveGpHistory_fd(sdeconn,remove_gp_history_xslt,out_xml)
-	RemoveGpHistory_fc(sdeconn,remove_gp_history_xslt,out_xml)
+	print 'gp history deleted'
 	TruncateAndAppend(mxd, TargetLT, TargetST)
+	print 'data updated'
