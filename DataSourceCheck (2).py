@@ -5,7 +5,7 @@ Created on July 10, 2014
 '''
 import arcpy, os
 #workspace to search for MXDs
-startplace = r"F:\Cart\projects\KanPlan\MXD"
+startplace = r"F:\Cart\projects\KanPlan\MXD\Public"
 arcpy.env.workspace = startplace
 Workspaces = arcpy.ListWorkspaces("*", "Folder")
 for Workspace in Workspaces:
