@@ -19,6 +19,10 @@
 #               Consider Including Layer files (in Kristen's package) for mapping errors and cleanup
 # KMG           12/18/2014 Added Topology and geometric network tools, general cleanup        
 # KMG            1/7/2015 general edit checking and cleanup
+#KMG 6/10/2015
+#KMG this code is superceded by the NGfLRSMethod script on https://github.com/dirktall04/Python/tree/master/Crash_Location_AddIn/Install
+#KMG This code is also superceded by the altered NGfLRSMethod script in hte NG911_KANSAS_KDOT python package
+
 #-------------------------------------------------------------------------------
 
 
