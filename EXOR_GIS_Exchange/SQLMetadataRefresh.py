@@ -25,6 +25,7 @@ def RemoveGpHistory_fc(remove_gp_history_xslt,out_xml, OpEnvironment):
             print "Imported XML on {0}".format(fx)
         except:
             print "could not complete xml conversion on {0}".format(fx)
+            pass
 
 if __name__== "__main__":
 
