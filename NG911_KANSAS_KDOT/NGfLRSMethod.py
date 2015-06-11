@@ -26,6 +26,8 @@
 # DAT            2015-05-05 -- Numdex Function should be using the rest of what we need.
 # DAT            2015-05-05 -- Just need to use the part for state routes.
 # DAT            2015-05-28 -- Removed NG911_Config import, replaced with InitalizeCurrentPathSettings() function.
+# KMG/DAT        2015-06-10 -- adjusted code to allow this script to be called upon from the NG911_Aggregate script, which will crawl the 
+#                                network directory and set the input workspace 
 #-------------------------------------------------------------------------------
 
 import re
@@ -352,7 +354,7 @@ def ConflateKDOT(cps):
     RubbersheetFeatures_edit("KDOT_Roads_Review","RoadLinks","RoadLinks_pnt","LINEAR")
     DetectFeatureChanges_management("KDOT_Roads_Review","RoadCenterline",gdb+"\\NG911\\RoadDifference",spatialtolerance,"#",gdb+"\\RoadDifTbl",spatialtolerance,"#")
     MakeFeatureLayer_management(gdb+"\\NG911\\RoadDifference","RoadDifference","#","#","#")
-    TransferAttributes_edit("KDOT_Roads_Review","RoadCenterline","YEAR_RECORD;ROUTE_ID",spatialtolerance,"#",gdb+"\\LRS_MATCH")
+    TransferAttributes_edit("KDOT_Roads_Review","RoadCenterline","YEAR_RECOR;ROUTE_ID",spatialtolerance,"#",gdb+"\\LRS_MATCH")
 
 
 #Add checks here to see if these exist prior to creating them. Should prevent RID_1, RID_2, RID_3, etc.
