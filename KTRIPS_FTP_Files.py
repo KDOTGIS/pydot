@@ -19,7 +19,8 @@ from arcpy.da import SearchCursor  # @UnresolvedImport
 import time, os
 
 try:
-    from KTRIPSconfig import repo, ftpHost, ftpUser, ftpPass, cansys, gdb, monthdb, yeardb
+    from KTRIPSconfig import repo, cansys, gdb#, monthdb, yeardb
+    from /SECURE/KTRIPS_FTP_config import ftpHost, ftpUser, ftpPass, 
     #from config_localtest import repo, ftpHost, ftpUser, ftpPass, cansys, gdb, monthdb, yeardb
 except:
     print "doing it in ArcMap? Get a compiler!"
