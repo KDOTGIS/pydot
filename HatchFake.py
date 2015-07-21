@@ -7,7 +7,7 @@ the points can be symbolically displayed as route hatches for web mapping
 '''
 
 #import arcpy
-from arcpy import (AddField_management, MakeFeatureLayer_management, CreateTable_management,da, 
+from arcpy import (AddField_management, MakeFeatureLayer_management, CreateTable_management,da, Exists, 
 TruncateTable_management, Append_management, MakeRouteEventLayer_lr, Delete_management, FeatureClassToFeatureClass_conversion, env)
 #set the geodatabase parameters for the input route data
 env.overwriteOutput = True
@@ -22,9 +22,6 @@ CountyFields = ["LRS_KEY", "BEG_CNTY_LOGMILE", "END_CNTY_LOGMILE"]
 #for mapping in KanPlan 1/10 mile seems plenty sufficient, and will create about 108,000 points for each LRM.  
 #1/100 would create 1,080,000 points which might suffer from use of in-memory processing, already this script takes a few minutes to run for each LRM 
 HatchSep = 0.1
-mem_point = "HatchPt"
-mem_table = "HatchEvents"
-
 countyLRM = [CountyfcRoutes, CountyOutTable, CountyFields]
 stateLRM = [StatefcRoutes, StateOutTable, StateFields]
 LRMethod = [countyLRM, stateLRM]
@@ -32,10 +29,21 @@ LRMethod = [countyLRM, stateLRM]
 for method in LRMethod:
     print "creating hatches for " + str(method[1])
     #add route table as feature layer
+    if Exists("RouteLyr"):
+        Delete_management("RouteLyr")
+    else:
+        pass
     MakeFeatureLayer_management(method[0], "RouteLyr", "DIRECTION in (  1 ,  2 )")
     #create event table in memory
-    mem_tbl = CreateTable_management("in_memory", mem_table)
-    mem_table = r"in_memory/"+mem_table
+    mem_table = "HatchEvents"
+    if Exists(r"in_memory\\"+mem_table):
+        print str(mem_table) +"already existed, deleting"
+        Delete_management(r"in_memory\\"+mem_table)
+    else:
+        print "Creating table for processing route increments of " + str(HatchSep)
+        
+    CreateTable_management("in_memory", mem_table)
+    mem_table = r"in_memory\\"+mem_table
     AddField_management(mem_table, "RouteID", "TEXT")
     AddField_management(mem_table, "LogMile", "Double")
         #add the route ID and event logmile fields
