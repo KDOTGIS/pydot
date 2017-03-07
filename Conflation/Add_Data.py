@@ -20,7 +20,7 @@ def LoadARegion():
     importGDB = r"\\gisdata\planning\Cart\projects\Conflation\GIS_DATA\GEO_COMM\REGION5_20151211\REGION5_20151211.gdb"
     LoadTarget = r"\\gisdata\planning\Cart\projects\Conflation\Workflow\conflation_sqlgis_geo.sde\Conflation.GEO."
     env.workspace = importGDB
-    ### There are no tables in the conflated dataset products
+    ### There are no tables in the conflated dataset products - handle similarly and separately
     skiplist = ['Stitch_Lines', 'RoadCenterlines', 'Overlaps_Gaps_MunicipalBoundary', 'Overlaps_Gaps_FIRE', 'Overlaps_Gaps_LAW', 'Overlaps_Gaps_PSAP', 'Overlaps_Gaps_ESZ', 'Overlaps_Gaps_EMS', 'Overlaps_Gaps_CountyBoundary', 'Overlaps_Gaps_AuthoritativeBoundary']
     tables = ListTables()
     for table in tables:

@@ -1,6 +1,6 @@
 '''
 Created on Jun 21, 2016
-
+This is my new  favorite script I've ever had
 @author: kyleg
 '''
 from arcpy import ImportXMLWorkspaceDocument_management, ChangePrivileges_management, env, EnableEditorTracking_management

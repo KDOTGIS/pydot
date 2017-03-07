@@ -348,13 +348,20 @@ def ConflateKDOT(cps):
         FeatureClassToFeatureClass_conversion("KDOT_Roads",gdb+"\\NG911","KDOT_Roads_Review","#","#","#")
     AddMessage("Transferring information via ESRI conflation tools.")
     MakeFeatureLayer_management(gdb+"\\KDOT_Roads_Review","KDOT_Roads_Review","#","#","#")
+    print "test 1, makefeature layer success"
     GenerateRubbersheetLinks_edit("KDOT_Roads_Review","RoadCenterline",gdb+"\\NG911\\RoadLinks",spatialtolerance,"ROUTE_ID LRSKEY",gdb+"\\RoadMatchTbl")
+    print "test 2, rubbersheet links generated"
     MakeFeatureLayer_management(gdb+"\\NG911\\RoadLinks","RoadLinks","#","#","#")
     MakeFeatureLayer_management(gdb+"\\NG911\\RoadLinks_pnt","RoadLinks_pnt","#","#","#")
+    print "test 3, makefeaturelayers of rubbersheet links"
     RubbersheetFeatures_edit("KDOT_Roads_Review","RoadLinks","RoadLinks_pnt","LINEAR")
+    print "test 4 rubbersheet features edit success"
     DetectFeatureChanges_management("KDOT_Roads_Review","RoadCenterline",gdb+"\\NG911\\RoadDifference",spatialtolerance,"#",gdb+"\\RoadDifTbl",spatialtolerance,"#")
+    print "detect feature changes success"
     MakeFeatureLayer_management(gdb+"\\NG911\\RoadDifference","RoadDifference","#","#","#")
+    print "makefeature layer of difference success"
     TransferAttributes_edit("KDOT_Roads_Review","RoadCenterline","YEAR_RECOR;ROUTE_ID",spatialtolerance,"#",gdb+"\\LRS_MATCH")
+    print "Transfer attributes edit success"
 
 
 #Add checks here to see if these exist prior to creating them. Should prevent RID_1, RID_2, RID_3, etc.
@@ -381,9 +388,11 @@ def addAdminFields(cps):
     addField(lyr, "KDOT_START_DATE", "DATE")
     addField(lyr, "KDOT_END_DATE", "DATE")
     addField(lyr, "SHAPE_MILES", "Double", "#", "#", "#" )
+    addField(lyr, "STATE_ID", "TEXT", "#", "#", "88")
     addField(Alias, "KDOT_PREFIX", "TEXT", "#", "#", "1" )
     addField(Alias, "KDOT_CODE", "LONG" )
     addField(Alias, "KDOT_ROUTENAME", "TEXT", "#", "#", "5" )
+    addField(Alias, "STATE_ID", "TEXT", "#", "#", "88")
     
 
 
@@ -398,7 +407,10 @@ def CalcAdminFields(cps):
     AddMessage("Populating Admin Fields.")
     CalcField(lyr,"KDOT_START_DATE","1/1/1901","PYTHON_9.3","#")
     CalcField(lyr,"UNIQUENO",'000',"PYTHON_9.3","#")
-    CalcField(lyr,"KDOTPreType","!ROUTE_ID![3]","PYTHON_9.3","#") #PreType is a conflated field, consider changing this to calculate from NENA fields
+    CalcField(lyr,"KDOTPreType","!ROUTE_ID![3]","PYTHON_9.3","#")
+    CalcField(lyr,"STATEID","!STEWARD! + !SEGID!","PYTHON_9.3","#")
+    CalcField(Alias,"STATEID","!STEWARD! + !SEGID!","PYTHON_9.3","#")
+     #PreType is a conflated field, consider changing this to calculate from NENA fields
     TableView(lyr, "NewPretype", "KDOTPreType is Null")
     CalcField("NewPretype","KDOTPreType","'L'","PYTHON_9.3","#")
     CalcField(lyr,"KDOT_ADMO","'X'","PYTHON_9.3","#")

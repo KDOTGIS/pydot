@@ -5,25 +5,155 @@ Created on Jun 24, 2015
 '''
 from arcpy import (CreateFileGDB_management, CreateFeatureclass_management, AddField_management, CreateDomain_management, 
                    DomainToTable_management, CreateDomain_management, AddCodedValueToDomain_management, MakeTableView_management, 
-                   TableToDomain_management, SetValueForRangeDomain_management)
+                   TableToDomain_management, SetValueForRangeDomain_management, Exists, Delete_management)
                   
-from arcpy.management import AddField
-
 workspace ='C:/temp'
-version = '01'
+version = '02'
 spatialCRS = ''
 gdbname = 'RailCrossing'+str(version)
 gdb = workspace + '/'+gdbname+'.gdb'
+CountyList = r'Database Connections\SDEPROD_SHARED.sde\SHARED.counties'
+CityList = r'Database Connections\SDEPROD_SHARED.sde\SHARED.CITY_LIMITS'
+MUTCDList = r'Database Connections\geo@sign_sqlgis.sde'
+in_table = gdb+"/Crossings"
+
 print gdb
 
-
 def main():
-    #GdbCreate(workspace, gdbname)
-    #dDirection(gdb)
-    #dCity(gdb)
+    #RestartGDB()
+    #GdbCreate()
+    #CreateDomains()
+    CrossingFields()
+    pass
+
+def CrossingFields():
+    print in_table
+    #This wohle section was copied from the RailCrossingDBDef20150728.xls in the CART/PROJECTS/RAilCrossing directory
+        #This spreadsheet was populated by Logan referencing the forms, reviewed by DArlene and Kyle a few times'
+    AddField_management(in_table, 'CrossingID', 'TExt', '#', '#', '7', 'Crossing ID', 'NULLABLE', 'NON_REQUIRED', '')
+    AddField_management(in_table, 'ENS_ID_N', 'Text', '#', '#', '3', 'ENS Crossing Number', 'NULLABLE', 'NON_REQUIRED', 'dENSPhone')
+    AddField_management(in_table, 'InspDir', 'Text', '#', '#', '2', 'Direction of Inspection (or Approach)', 'NULLABLE', 'NON_REQUIRED', 'dDirection')
+    AddField_management(in_table, 'InvDate', 'Date', '#', '#', '#', 'Inventory Date', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'InvBy', 'Text', '#', '#', '55', 'Inventoried by (name(s))', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'XInstallDate', 'Date', '#', '#', '#', 'Crossing Installation Date', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'XInstallProj', 'Text', '#', '#', '9', 'Crossing Project ID', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'City', 'Text', '#', '#', '3', 'City', 'NULLABLE', 'NON_REQUIRED', 'dCity')
+    AddField_management(in_table, 'County', 'Text', '#', '#', '3', 'County', 'NULLABLE', 'NON_REQUIRED', 'dCounty')
+    AddField_management(in_table, 'Latitude', 'Double', '24', '7', '#', 'Latitude', 'NULLABLE', 'NON_REQUIRED', 'dKSLat')
+    AddField_management(in_table, 'Longitude', 'Double', '24', '7', '#', 'Longitude', 'NULLABLE', 'NON_REQUIRED', 'dKSLong')
+    AddField_management(in_table, 'LocSource', 'Text', '#', '#', '3', 'Lat/Long Source', 'NULLABLE', 'NON_REQUIRED', 'dSource')
+    AddField_management(in_table, 'Power', 'Text', '#', '#', '1', 'Power', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'District', 'Text', '#', '#', '3', 'District', 'NULLABLE', 'NON_REQUIRED', 'dDistrict')
+    AddField_management(in_table, 'CityVicin', 'Text', '#', '#', '3', 'City In Near Indicator', 'NULLABLE', 'NON_REQUIRED', 'dCityNear')
+    AddField_management(in_table, 'OnSHS', 'Text', '#', '#', '1', 'On State Highway System', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'Position', 'Text', '#', '#', '3', 'FRA Crossing Position', 'NULLABLE', 'NON_REQUIRED', 'dPosition')
+    AddField_management(in_table, 'Zoning', 'Text', '#', '#', '2', 'Development:', 'NULLABLE', 'NON_REQUIRED', 'dDevelopmentZoned')
+    AddField_management(in_table, 'Quiet', 'Text', '#', '#', '1', 'Quiet Zone', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'Public', 'Text', '#', '#', '1', 'Open to Public', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'Angle', 'LONG', '3', '0', '#', 'Crossing Angle', 'NULLABLE', 'NON_REQUIRED', 'dRange0_90')
+    AddField_management(in_table, 'Length', 'Double', '6', '1', '#', 'Surface Length Feet', 'NULLABLE', 'NON_REQUIRED', 'dLength10_220')
+    AddField_management(in_table, 'Separation', 'Double', '6', '1', '#', 'Distance to Separation Feet', 'NULLABLE', 'NON_REQUIRED', 'dLength0_100')
+    AddField_management(in_table, 'Gouge', 'Text', '#', '#', '1', 'Gouge Marks', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'LeftAlign', 'Text', '#', '#', '3', 'Left Rail Alignment', 'NULLABLE', 'NON_REQUIRED', 'dAlignment')
+    AddField_management(in_table, 'RightAlign', 'Text', '#', '#', '3', 'Right Rail Alignment', 'NULLABLE', 'NON_REQUIRED', 'dAlignment')
+    AddField_management(in_table, 'DownRoad', 'Text', '#', '#', '1', 'Track Down Road', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'RdWidth', 'Double', '6', '1', '#', 'Roadway Width (Feet)', 'NULLABLE', 'NON_REQUIRED', 'dLength10_220')
+    AddField_management(in_table, 'AppAlign', 'Text', '#', '#', '3', 'Approach Alignment', 'NULLABLE', 'NON_REQUIRED', 'dAlignment')
+    AddField_management(in_table, 'DeptAlign', 'Text', '#', '#', '3', 'Depart Alignment', 'NULLABLE', 'NON_REQUIRED', 'dAlignment')
+    AddField_management(in_table, 'Status', 'Text', '#', '#', '2', 'Crossing Status', 'NULLABLE', 'NON_REQUIRED', 'dStatus')
+    AddField_management(in_table, 'Material', 'Text', '#', '#', '3', 'Mainline Surface Material ', 'NULLABLE', 'NON_REQUIRED', 'dMaterialKDOT')
+    AddField_management(in_table, 'Type', 'Text', '#', '#', '3', 'FRA Crossing Type', 'NULLABLE', 'NON_REQUIRED', 'dCrossingType')
+    AddField_management(in_table, 'Quadrants', 'LONG', '1', '0', '#', 'Quadrants Blocks', 'NULLABLE', 'NON_REQUIRED', 'dRange0_5')
+    AddField_management(in_table, 'Illumination', 'Text', '#', '#', '1', 'Crossing Illumination', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'Narrative', 'Text', '#', '#', '99', 'Narrative', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'Crossbuck', 'LONG', '1', '0', '#', 'Crossbucks', 'NULLABLE', 'NON_REQUIRED', 'dRange0_8')
+    AddField_management(in_table, 'XBReflect', 'Text', '#', '#', '2', 'Crossbuck Reflectorization', 'NULLABLE', 'NON_REQUIRED', 'dReflective')
+    AddField_management(in_table, 'FlashLight', 'LONG', '2', '0', '#', 'Flashing Light Pairs', 'NULLABLE', 'NON_REQUIRED', 'dRange0_18')
+    AddField_management(in_table, 'Lens', 'Text', '#', '#', '2', 'Lens Size', 'NULLABLE', 'NON_REQUIRED', 'dFlashLight')
+    AddField_management(in_table, 'Masts', 'LONG', '1', '0', '#', 'Mast Count', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'MastLightType', 'Text', '#', '#', '3', 'Mast Light Type', 'NULLABLE', 'NON_REQUIRED', 'dtLightType')
+    AddField_management(in_table, 'MastLightConfig', 'Text', '#', '#', '3', 'Mast Light Configuration', 'NULLABLE', 'NON_REQUIRED', 'dMastLightConfig')
+    AddField_management(in_table, 'CantOver', 'LONG', '1', '0', '#', 'Cantilever Over Thru Lanes', 'NULLABLE', 'NON_REQUIRED', 'dRange0_4')
+    AddField_management(in_table, 'CantNotOver', 'LONG', '1', '0', '#', 'Cantilever Not Over Thru Lanes', 'NULLABLE', 'NON_REQUIRED', 'dRange0_4')
+    AddField_management(in_table, 'CantOverType', 'Text', '#', '#', '3', 'Cantilever Flashing Light', 'NULLABLE', 'NON_REQUIRED', 'dLightType')
+    AddField_management(in_table, 'NoGatesRd', 'LONG', '1', '0', '#', 'Number of Gates Roadway', 'NULLABLE', 'NON_REQUIRED', 'dRange0_8')
+    AddField_management(in_table, 'NoGatesPed', 'LONG', '1', '0', '#', 'Number of Gates Sidewalk', 'NULLABLE', 'NON_REQUIRED', 'dRange0_8')
+    AddField_management(in_table, 'GateLight', 'Text', '#', '#', '1', 'Gate Mounted Flashing Lights', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'Horn', 'Text', '#', '#', '1', 'Wayside Horn', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'Bells', 'LONG', '1', '0', '#', 'Bells', 'NULLABLE', 'NON_REQUIRED', 'dRange0_4')
+    AddField_management(in_table, 'QuadGates', 'Text', '#', '#', '1', 'Four Quad Gates Present', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'GateChan', 'Text', '#', '#', '2', 'Channelization with Gates', 'NULLABLE', 'NON_REQUIRED', 'dSideDesc')
+    AddField_management(in_table, 'TrafSig', 'LONG', '1', '0', '#', 'Traffic Signals', 'NULLABLE', 'NON_REQUIRED', 'dRange0_4')
+    AddField_management(in_table, 'HwyTrafSig', 'Text', '#', '#', '1', 'Highway Traffic Signals controling crossing', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'FlshOthr', 'LONG', '2', '0', '#', 'Other Flashing Lights', 'NULLABLE', 'NON_REQUIRED', 'dRange0_12')
+    AddField_management(in_table, 'FlshOthrTyp', 'Text', '#', '#', '2', 'Other Flashing Lights Type', 'NULLABLE', 'NON_REQUIRED', 'dFlashType')
+    AddField_management(in_table, 'WInstallDate', 'Date', '#', '#', '#', 'Warning Device Installation Date', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'WInstallProj', 'Text', '#', '#', '9', 'Warning Device Installation Project ID', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'W10_1', 'LONG', '1', '0', '#', 'Advanced Warning Sign W10-1 Count', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'W10_1a', 'LONG', '1', '0', '#', 'yellow exempt warning sign', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'W10_2', 'LONG', '1', '0', '#', 'Advanced Warning Sign W10-2 Count', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'W10_3', 'LONG', '1', '0', '#', 'Advanced Warning Sign W10-3 Count', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'W10_4', 'LONG', '1', '0', '#', 'Advanced Warning Sign W10-4 Count', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'W10_11', 'LONG', '1', '0', '#', 'Advanced Warning Sign W10-11 Count', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'W10_12', 'LONG', '1', '0', '#', 'Advanced Warning Sign W10-12 Count', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'W10_5', 'LONG', '1', '0', '#', 'Hump Crossing Sign', 'NULLABLE', 'NON_REQUIRED', 'dRange0_6')
+    AddField_management(in_table, 'R15_3', 'Text', '#', '#', '1', 'white exempt sign on crossbuck', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'AdvWrnSgnRef', 'Text', '#', '#', '1', 'Advanced Warning Signs Reflectivity', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'PostedNo', 'Text', '#', '#', '1', 'Crossing number Posted', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'HumpSign', 'Text', '#', '#', '1', 'Hump Signs Indicator', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'StopSign', 'LONG', '1', '0', '#', 'Stop Signs', 'NULLABLE', 'NON_REQUIRED', 'dRange0_5')
+    AddField_management(in_table, 'YieldSign', 'LONG', '1', '0', '#', 'Yield Signs', 'NULLABLE', 'NON_REQUIRED', 'dRange0_5')
+    AddField_management(in_table, 'NoESNSign', 'LONG', '1', '0', '#', 'How many ENS signs posted', 'NULLABLE', 'NON_REQUIRED', 'dRange0_5')
+    AddField_management(in_table, 'EmgcySgn', 'Text', '#', '#', '3', 'Emergency Signs (ENS/DOT) 1-13', 'NULLABLE', 'NON_REQUIRED', 'dRailPhone')
+    AddField_management(in_table, 'MUTCD1', 'LONG', '1', '0', '#', 'Other Sign MUTCD 1', 'NULLABLE', 'NON_REQUIRED', 'dRange0_2')
+    AddField_management(in_table, 'MUTCDTyp1', 'Text', '#', '#', '8', 'Other Sign MUTCD Type 1', 'NULLABLE', 'NON_REQUIRED', 'dMUTCDCode')
+    AddField_management(in_table, 'MUTCD2', 'LONG', '1', '0', '#', 'Other Sign MUTCD 2', 'NULLABLE', 'NON_REQUIRED', 'dRange0_2')
+    AddField_management(in_table, 'MUTCDTyp2', 'Text', '#', '#', '8', 'Other Sign MUTCD Type 2', 'NULLABLE', 'NON_REQUIRED', 'dMUTCDCode')
+    AddField_management(in_table, 'MUTCD3', 'LONG', '1', '0', '#', 'Other Sign MUTCD 3', 'NULLABLE', 'NON_REQUIRED', 'dRange0_2')
+    AddField_management(in_table, 'MUTCDTyp3', 'Text', '#', '#', '8', 'Other Sign MUTCD Type 3', 'NULLABLE', 'NON_REQUIRED', 'dMUTCDCode')
+    AddField_management(in_table, 'PreDir', 'Text', '#', '#', '2', 'Prefix Direction of Street', 'NULLABLE', 'NON_REQUIRED', 'dDirection')
+    AddField_management(in_table, 'StrName', 'Text', '#', '#', '64', 'Street Name', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'StrType', 'Text', '#', '#', '10', 'Street Type', 'NULLABLE', 'NON_REQUIRED', 'dStrType')
+    AddField_management(in_table, 'RoadType', 'Text', '#', '#', '2', 'Roadway Type', 'NULLABLE', 'NON_REQUIRED', 'dRdType')
+    AddField_management(in_table, 'NoLanes', 'LONG', '2', '0', '#', 'Traffic Lanes', 'NULLABLE', 'NON_REQUIRED', 'dRange0_12')
+    AddField_management(in_table, 'ShldWidth', 'LONG', '2', '0', '#', 'Shoulder Width (Feet)', 'NULLABLE', 'NON_REQUIRED', 'dRange0_12')
+    AddField_management(in_table, 'ShldSurf', 'Text', '#', '#', '1', 'Shoulder Surface Indicator', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'SpeedLim', 'Text', '#', '#', '2', 'Speed Limit', 'NULLABLE', 'NON_REQUIRED', 'dSpeedLim')
+    AddField_management(in_table, 'SpeedReg', 'Text', '#', '#', '2', 'Speed Regulation', 'NULLABLE', 'NON_REQUIRED', 'dSpeedReg')
+    AddField_management(in_table, 'Turnout', 'Text', '#', '#', '1', 'Truck Turnout', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'Curb', 'Text', '#', '#', '1', 'Curb Gutter', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'NHS', 'Text', '#', '#', '2', 'Highway System', 'NULLABLE', 'NON_REQUIRED', 'dNHS')
+    AddField_management(in_table, 'EmergencyRoute', 'Text', '#', '#', '1', 'Emergency Services Route', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'UrbanCode', 'Text', '#', '#', '1', 'Urban Rural', 'NULLABLE', 'NON_REQUIRED', 'dUrbanRural')
+    AddField_management(in_table, 'Funclass', 'Text', '#', '#', '1', 'Functional Classification', 'NULLABLE', 'NON_REQUIRED', 'dFUN')
+    AddField_management(in_table, 'Sidewalk', 'Text', '#', '#', '4', 'Sidewalk', 'NULLABLE', 'NON_REQUIRED', 'dSideDesc')
+    AddField_management(in_table, 'PavMark', 'Text', '#', '#', '2', 'Pavement Markings', 'NULLABLE', 'NON_REQUIRED', 'dApproach')
+    AddField_management(in_table, 'PavMarkStop', 'Text', '#', '#', '2', 'Stopline Pavement Markings', 'NULLABLE', 'NON_REQUIRED', 'dApproach')
+    AddField_management(in_table, 'Channels', 'Text', '#', '#', '2', 'ChannelizationDevices', 'NULLABLE', 'NON_REQUIRED', 'dApproach')
+    AddField_management(in_table, 'Medians', 'Text', '#', '#', '1', 'ChannelizationMedians', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'Passing', 'Text', '#', '#', '2', 'No Passing Lines', 'NULLABLE', 'NON_REQUIRED', 'dApproach')
+    AddField_management(in_table, 'HwySigs', 'Text', '#', '#', '1', 'Nearby Highway Intersection Signals', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'AppHwyInt', 'Double', '3', '1', '#', 'Approach Nearby Intersecting Highway', 'NULLABLE', 'NON_REQUIRED', 'dLength500')
+    AddField_management(in_table, 'AppSurfType', 'Text', '#', '#', '2', 'Approach Roadway Surface Type', 'NULLABLE', 'NON_REQUIRED', 'dMaterial')
+    AddField_management(in_table, 'AppHwySigs', 'Text', '#', '#', '1', 'Approach Intersecting Highway Signals', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'DepHwyInt', 'Double', '3', '1', '#', 'Depart Nearby Intersecting Highway', 'NULLABLE', 'NON_REQUIRED', 'dLength500')
+    AddField_management(in_table, 'DepSurfType', 'Text', '#', '#', '2', 'Depart Roadway Surface Type', 'NULLABLE', 'NON_REQUIRED', 'dMaterial')
+    AddField_management(in_table, 'DepHwySigs', 'Text', '#', '#', '1', 'Depart Intersecting Highway Signals', 'NULLABLE', 'NON_REQUIRED', 'dYesNo')
+    AddField_management(in_table, 'OpCo', 'Text', '#', '#', '4', 'Operating Railroad Company', 'NULLABLE', 'NON_REQUIRED', '#')
+    AddField_management(in_table, 'MainTrk', 'LONG', '1', '0', '#', 'Main Tracks', 'NULLABLE', 'NON_REQUIRED', 'dRange0_5')
+    AddField_management(in_table, 'OtherTrk', 'LONG', '2', '0', '#', 'Other Tracks', 'NULLABLE', 'NON_REQUIRED', 'dRange0_12')
+    AddField_management(in_table, 'OtherTrkDesc', 'Text', '#', '#', '2', 'Other Tracks Description', 'NULLABLE', 'NON_REQUIRED', 'dTrackType')
+    AddField_management(in_table, 'Milepost', 'Double', '5', '3', '#', 'Railroad Milepost', 'NULLABLE', 'NON_REQUIRED', 'dRange0_800')
+    AddField_management(in_table, 'Notes', 'Text', '#', '#', '750', 'Notes', 'NULLABLE', 'NON_REQUIRED', '#')
+
+
+
+def CreateDomains():
+    dDirection(gdb)
+    dCity(gdb)
     #dCounty(gdb)
-    #dCoordinateX(gdb)
-    #dCoordinateY(gdb)
+    dCoordinateX(gdb)
+    dCoordinateY(gdb)
     dCodedValueDomainYN(gdb)
     dCodedValueDomainDistrict(gdb)
     dCodedValueDomainLocSource(gdb)
@@ -39,7 +169,25 @@ def main():
     dRange0_4(gdb)
     dRange0_6(gdb)
     dRange0_8(gdb)
-
+    dReflector(gdb)
+    dDiameter(gdb)
+    dLighting(gdb)
+    dPosition(gdb)
+    dSide(gdb)
+    dFlashType(gdb)
+    dENSPhone(gdb)
+    dMUTCDCode(gdb) #copy this domain from the ESRI Sign database
+    dStrPrefix(gdb)
+    dRdSuffix(gdb)
+    dSpeedLim(gdb)
+    dSpeedReg(gdb)
+    dNHS(gdb)
+    dUrbanRural(gdb)
+    dFunClass(gdb)
+    dApproach(gdb)
+    dRailRoadAdmo(gdb)
+    dTrackType(gdb)
+    
 
 def dReflector(igdb):  
     cDomainName = 'dcReflector'
@@ -82,7 +230,7 @@ def dSide(igdb):
     print cDomainName
 
 def dFlashType(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dFlashType'
     cdDomainValueDict = {"0T":"No Turn", "0L":"No Left Turn", "0R":"No Right Turn", "00":"None", 
                          "R":"Red", "SZ":"School Zone", "TY":"Truck Yard", "Y":"Yellow"}
     CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
@@ -91,35 +239,27 @@ def dFlashType(igdb):
     print cDomainName  
 
 def dENSPhone(igdb):  
-    cDomainName = 'dGeneric'
-    cdDomainValueDict = {"800-832-5452":"800-832-5452 BNSF",
-                         "620-649-3280":"620-649-3280 Cimarron Valley", 
-                         "800-914-7850":"800-914-7850 Garden City Western",\
-                         "866-386-9321":"866-386-9321 Kansas & Oklahoma",\
-                         "877-527-9464":"877-527-9464 Kansas City Southern",\
-                         "913-551-2179":"913-551-2179 Kansas City Terminal ",\
-                         "800-800-3490":"800-800-3490 Kyle",\
-                         "800-533-9416":"800-533-9416 Nebraska, Kansas, Colorado",\
-                         "913-785-0720":"913-785-0720 New Century AirCenter",\
-                         "866-386-9321":"866-386-9321 South Kansas & Oklahoma",\
-                         "800-848-8715":"800-848-8715 Union Pacific",\
-                         "800-639-5054":"800-639-5054 V & S",\
-                         "800-832-5452":"800-832-5452 Wichita Terminal"}
+    cDomainName = 'dENSPhone'
+    cdDomainValueDict = {"BN":"800-832-5452 BNSF",
+                         "CV":"620-649-3280 Cimarron Valley", 
+                         "GCW":"800-914-7850 Garden City Western",\
+                         "KO":"866-386-9321 Kansas & Oklahoma",\
+                         "KCS":"877-527-9464 Kansas City Southern",\
+                         "KCT":"913-551-2179 Kansas City Terminal ",\
+                         "K":"800-800-3490 Kyle",\
+                         "NKC":"800-533-9416 Nebraska, Kansas, Colorado",\
+                         "NCA":"913-785-0720 New Century AirCenter",\
+                         "SKO":"866-386-9321 South Kansas & Oklahoma",\
+                         "UP":"800-848-8715 Union Pacific",\
+                         "VS":"800-639-5054 V & S",\
+                         "WT":"800-832-5452 Wichita Terminal"}
     CreateDomain_management  (gdb, cDomainName, 'Emergency Phone Number', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
     for code in cdDomainValueDict:        
         AddCodedValueToDomain_management(gdb, cDomainName, code, cdDomainValueDict[code])
     print cDomainName  
 
-def dMUTCDno(igdb):  
-    cDomainName = 'dGeneric'
-    cdDomainValueDict = {"MUTCD signage number list"}
-    CreateDomain_management  (gdb, cDomainName, 'MUTCD Sign Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
-    for code in cdDomainValueDict:        
-        AddCodedValueToDomain_management(gdb, cDomainName, code, cdDomainValueDict[code])
-    print cDomainName
-
 def dStrPrefix(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dStrPrefix'
     cdDomainValueDict = {"AVE":"Avenue", "BLVD":"Boulevard", "CIR":"Circle", "DR":"Drive", "HWY":"Highway", 
                          "LN":"Lane", "PKWY":"Parkway", "PL":"Place", "RD":"Road", "ST":"Street", "TER":"Terrace", "WAY":"Way"}
     CreateDomain_management  (gdb, cDomainName, 'Road Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
@@ -128,7 +268,7 @@ def dStrPrefix(igdb):
     print cDomainName  
 
 def dRdSuffix(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dRdSuffix'
     cdDomainValueDict = {"I":"Interstate","US":"US Route", "SH": "State Highway", "CR":"County Road", 
                          "TL":"Toll Road", "LS":"Local Street", "FM":"Farm to Market"}
     CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
@@ -137,7 +277,7 @@ def dRdSuffix(igdb):
     print cDomainName  
 
 def dSpeedLim(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dSpeedLim'
     cdDomainValueDict = {"10":"10 mph","15":"15 mph","20":"20 mph","25":"25 mph","30":"30 mph",
                          "35":"35 mph","40":"40 mph","45":"45 mph","50":"50 mph","55":"55 mph",
                          "60":"60 mph","65":"65 mph","70":"70 mph","75":"75 mph","80":"80 mph"}
@@ -147,7 +287,7 @@ def dSpeedLim(igdb):
     print cDomainName  
 
 def dSpeedReg(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dSpeedReg'
     cdDomainValueDict = {"P":"Posted", "S":"Statutory"}
     CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
     for code in cdDomainValueDict:        
@@ -155,7 +295,7 @@ def dSpeedReg(igdb):
     print cDomainName  
 
 def dNHS(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dNHS'
     cdDomainValueDict = {"I":"Interstate National Highway System", "N":"Non-Federal-Aid", "O":"Other Federal-Aid Highway-Not NHS", 
                          "H":"Other National Highway System"}
     CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
@@ -163,8 +303,8 @@ def dNHS(igdb):
         AddCodedValueToDomain_management(gdb, cDomainName, code, cdDomainValueDict[code])
     print cDomainName  
     
-def UrbanRural(igdb):  
-    cDomainName = 'dGeneric'
+def dUrbanRural(igdb):  
+    cDomainName = 'dUrbanRural'
     cdDomainValueDict = {"U":"Urban", "R":"Rural"}
     CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
     for code in cdDomainValueDict:        
@@ -172,10 +312,10 @@ def UrbanRural(igdb):
     print cDomainName  
     
 def dFunClass(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dFunClass'
     cdDomainValueDict = {"1":"Interstate", "2":"Other Freeway and Exressway", "3":"Other Principal Arterial", 
                          "4":"Minor Arterial", "5":"Major Collector", "6":"Minor Collector", "7":"Local"}
-    CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
+    CreateDomain_management  (gdb, cDomainName, 'dFunClass', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
     for code in cdDomainValueDict:        
         AddCodedValueToDomain_management(gdb, cDomainName, code, cdDomainValueDict[code])
     print cDomainName  
@@ -184,13 +324,13 @@ def dApproach(igdb):
     cDomainName = 'dGeneric'
     cdDomainValueDict = {"1a":"Approach Side Only", "2":"Both Approach and Depart Sides", 
                          "1d":"Depart Side only", "0":"Neither Approach nor Depart Sides"}
-    CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
+    CreateDomain_management  (gdb, cDomainName, 'Approach', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
     for code in cdDomainValueDict:        
         AddCodedValueToDomain_management(gdb, cDomainName, code, cdDomainValueDict[code])
     print cDomainName  
     
 def dRailRoadAdmo(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dRailRoadAdmo'
     cdDomainValueDict =  {"BN":"BNSF",
                          "CV":"Cimarron Valley", 
                          "GCW":"Garden City Western",
@@ -204,15 +344,15 @@ def dRailRoadAdmo(igdb):
                          "UP":"Union Pacific",
                          "VS":"V & S",
                          "WT":"Wichita Terminal"}
-    CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
+    CreateDomain_management  (gdb, cDomainName, 'Railroad Administrative Owner', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
     for code in cdDomainValueDict:        
         AddCodedValueToDomain_management(gdb, cDomainName, code, cdDomainValueDict[code])
     print cDomainName  
     
 def dTrackType(igdb):  
-    cDomainName = 'dGeneric'
+    cDomainName = 'dTrackType'
     cdDomainValueDict = {"I":"Industry", "S":"Siding", "T":"Transit", "Y":"Yard" }
-    CreateDomain_management  (gdb, cDomainName, 'Railroad Crossing Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
+    CreateDomain_management  (gdb, cDomainName, 'Track Type', 'TEXT', 'CODED', 'DEFAULT', 'DEFAULT')
     for code in cdDomainValueDict:        
         AddCodedValueToDomain_management(gdb, cDomainName, code, cdDomainValueDict[code])
     print cDomainName  
@@ -355,14 +495,21 @@ def dDirection(igdb):
     
 def dCity(igdb):
     #tblCityList = MakeTableView_management('Database Connections\SDEPROD_SHARED.sde\SHARED.CITY_LIMITS', 'CityList', gdb)
-    TableToDomain_management('Database Connections\SDEPROD_SHARED.sde\SHARED.CITY_LIMITS', "CITYNUMBER", "CITY", gdb, "dCityNum", "List of Cities in Kansas")
+    TableToDomain_management(CityList, "CITYNUMBER", "CITY", gdb, "dCityNum", "List of Cities in Kansas")
     print "added dCityNum domain"
     
 def dCounty(igdb):
     #tblCityList = MakeTableView_management('Database Connections\SDEPROD_SHARED.sde\SHARED.CITY_LIMITS', 'CityList', gdb)
-    TableToDomain_management('Database Connections\SDEPROD_SHARED.sde\SHARED.counties', "COUNTY_NO", "COUNTY_NAME", gdb, "dCountyNum", "List of Counties in Kansas")
+    TableToDomain_management(CountyList, "COUNTY_NO", "COUNTY_NAME", gdb, "dCountyNum", "List of Counties in Kansas", 'REPLACE')
     print "added dCountyNum domain"
+    #some geomedia using moron copied and pasted woodson county into the county boundary layer again
     
+def dMUTCDCode(igdb):
+    #MUTCD codes exist in an ESRI Sign Inventory Data Model for State Government, source geodatabase is defined at the top.
+    cDomainName = 'dSignCode'
+    print gdb+'/MUTCD'
+    DomainToTable_management(MUTCDList, 'SignCode',gdb+'/MUTCD', 'Code', 'Description')
+    TableToDomain_management(gdb+'/MUTCD', 'Code', 'Description', gdb, cDomainName, 'MUTCD Sign Code', 'REPLACE')
     
 def dCodedValueDomain(igdb):    
     cdDomainValueDict = {"E":"East", "N":"North", "NE":"Northeast", "NW":"Northwest", "S":"South", "SE":"Southeast", "SW":"Southwest", "W":"West"}
@@ -371,152 +518,15 @@ def dCodedValueDomain(igdb):
     for code in cdDomainValueDict:        
         AddCodedValueToDomain_management(gdb, cDomainName, code, cdDomainValueDict[code])
     print cDomainName
-    
-def CrossingFields(workspace):
-    #The letter contains a parity check or some type of logic that is required based on the number.  Leading zeros are required.
-    AddField_management('ENS_ID_N', 'TEXT', precision ='#', scale='#', length='7', 
-                        alias ='ENS Crossing Number', Nullable = 'NULLABLE', Required = 'NON_REQUIRED' , Domain = '#')
-    
-def GdbCreate(iworkspace, igdb):
-    gdb = igdb
-    workspace = iworkspace
-    CreateFileGDB_management(iworkspace, gdb)
-    outpathfc = workspace + '/'+gdbname+'.gdb'
-    CreateFeatureclass_management(outpathfc, 'Crossings', 'POINT', '#', 'DISABLED', 'ENABLED', spatialCRS)
-    
-'''
-    AddField_management(ENS_ID_N    ENS Crossing Number    Text(7)                            
-    InspDir    Direction of Inspection (or Approach)    Text(2)    coded value    dDirection        East, North, Northeast, Northwest, South, Southeast, Southwest, West        East, North, Northeast, Northwest, South, Southeast, Southwest, West    
-    InvDate    Inventory Date    Date            current date            Calendar  DD-MMM-YYYY    inspection date
-    InvBy    Inventoried by (name(s))    Text(55)    (track changes - edited by)        user name    active directory user name            need acutal name
-    XInstallDate    Crossing Installation Date    Date                            
-    XInstallProj    Crossing Project ID    text(9)                            Project numbner
-                                        
-def Location                                        
-    City    City    Text(3)    coded value    dCity        List of cities            
-    County    County    Text(3)    coded value    dCounty        List of 100 counties            
-    Latitude    Latitude    Number(24,7)    range    dKSLat        34-39        Must be seven digit to the right of the decimal point.  (Middle of railroad tracks and roadway)  example 37.8687700    
-    Longitude    Longitude    Number(24,7)    range    dKSLong        -94--101        Must be seven digit to the right of the decimal point.  (Middle of railroad tracks and roadway) example -97.6722970    
-    LocSource    Lat/Long Source    Text(3)    coded value    dSource    Actual    Actual, Estimated        Actual, Estimated    
-    Power    Power    boolean    coded value    dYesNo        Yes, No        Yes, No    estimates usually come from Railroad companies, KDOT does actual location.  Actual location means we located the site.  
-    District    District    Text(3)    coded value    dDistrict        1, 2, 3, 4, 5, 6        1, 2, 3, 4, 5, 6    is there electricity there?  Can you see a powerline that is within about 50 feet of the intersection?
-    CityVicin    City In Near Indicator    Text(3)    coded value    dCityNear        Within City Limits, Near/Outside City Limits        Within City Limits, Near/Outside City Limits    what is the closest city?  
-    OnSHS    On State Highway System    boolean    coded value    dYesNo                Non-State System (Rural), Non-State System (City Classified), State System    
-    Position    FRA Crossing Position    Text(3)    coded value    dPosition        At Grade, Railroad Over, Railroad Under        At Grade, Railroad Over, Railroad Under    
-    Zoning    Development:    Text(12)    coded value    dZoned        Commercial, Industrial, Institutional, Open Space, Residential        Commercial, Industrial, Institutional, Open Space, Residential    
-    Quiet    Quiet Zone    boolean    coded value    dYesNo        Yes, No        Yes, No    
-    Public    Open to Public    boolean    coded value    dYesNo        Yes, No        Yes, No    
-                                        
-def Geometry                                        
-    Angle    Crossing Angle    Number    range    dRange0_90        0-90        0 to 14 degrees, 15 to 29 degrees, 30 to 44 degrees, 45 to 59 degrees, 60 to 74 degrees, 75 to 90 degrees    what is the smallest angle between the railroad and the roadway?
-    Length    Surface Length Feet    Number(6,1)    range    dLength10_220        10-220        By full or half foot measurement    what is the length of the trackage crossing surface at the roadway? The surface length of the crossing is measured in the general direction of the roadway width, perpendicular to the roadway. The measurement should be done with a wheel, rounded to one half of a foot.
-    Separation    Distance to Separation Feet    Number(6,1)    range    dLength0_100                If less than 100 feet on the same roadway    what is the distance between multiple rails at a crossing
-    Gouge    Gouge Marks    boolean    coded value    dYesNo        Yes, No        Yes, No    
-    LeftAlign    Left Rail Alignment    Text(3)    coded value    dAlignment        Tangent, Curve        Tangent, Curve    within about 600 feet of the crossing, is the railroad straight (tangent) or is there a horizontal curve (Curve)?
-    RightAlign    Right Rail Alignment    Text(3)    coded value    dAlignment                Tangent, Curve    within about 600 feet of the crossing, is the railroad straight (tangent) or is there a horizontal curve (Curve)?
-    DownRoad    Track Down Road    boolean    coded value    dYesNo        Yes, No        Yes, No    
-    RdWidth    Roadway Width (Feet)    Number(6,1)    range    dLength10_220                By full or half foot measurement    width of the driving surface (curb to curb, no shoulders) of the road at the crossing location, to one-half foot.
-    AppAlign    Approach Alignment    Text(3)    coded value    dAlignment                Tangent, Curve    within about 500 feet of the crossing, is the roadway straight (tangent) or is there a horizontal curve (Curve)?
-    DeptAlign    Depart Alignment    Text(3)    coded value    dAlignment                Tangent, Curve    within about 500 feet of the crossing, is the roadway straight (tangent) or is there a horizontal curve (Curve)?
-                                        
-                                        
-def General                                        
-    Status    Crossing Status    Text(12)    coded value    dStatus        Crossing Actively Used, Railroad Abandonment, Road closed, Tracks present but Unusable, Tracks Removed, Crossing Closed        Crossing Actively Used, Railroad Abandonment, Road closed, Tracks present but Unusable, Tracks Removed, Crossing Closed    
-    Material    Mainline Surface Material     Text(12)    coded value    dMaterialKDOT        Asphalt, Asphalt and Flange, Concrete, Concrete and Rubber, Metal, Other, Rubber, Timber, Unconsolidated        Asphalt, Asphalt and Flange, Concrete, Concrete and Rubber, Metal, Other, Rubber, Timber, Unconsolidated, Composite    KDOT and FRA have different materials lists, merge the lists by adding composite. Composite means there are two distinct materials from the list used at the crossing.  
-    Type    FRA Crossing Type    Drop down list    coded value    dCrossingType        Pedestrian Crossing, Private Vehicle Crossing, Public Vehicle Crossing        Pedestrian Crossing, Private Vehicle Crossing, Public Vehicle Crossing    
-    Quadrants    Quadrants Blocks    Number(2)    range    dRange0_5                    At 23 feet from the track (8 feet back from the stop) is there anything blocking the view from the road the track?  If there is, anything blocking, how many quadrants are blocked?
-    Illumination    Crossing Illumination    Drop down list    coded value    dYesNo        Yes, No        Yes, No    
-    Narrative    Narrative    Text(99)                        Limited to 99 spaces    
-                                        
-def Warning Device                                        
-    Crossbuck    Crossbucks    Number(2)    range    dRange0_8        0-6        Enter a count of the number of mast or posts with mounted crossbucks, not a count of the number of crossbucks.    
-    XBReflect    Crossbuck Reflectorization    Drop down list    coded value    dReflective        Nonreflectorized, Prismatic, Reflectorized        Nonreflectorized, Prismatic, Reflectorized    
-    FlashLight    Flashing Light Pairs    Number(2)    range    dRange0_18                    
-    Lens    Lens Size    Drop down list    coded value    dFlashLight        Regular pair, 6 inch diameter, 8 inch diameter, 10 inch diameter, 12 inch diameter        Regular pair: 6 inch diameter, 8 inch diameter, 10 inch diameter, 12 inch diameter    
-    Masts    Mast Count    Number(2)    range    dRange0_6    III3D                
-    MastLightType    Mast Light Type    Drop down list    coded value    dtLightType    III3D    Incandescent, LED, Both            
-    MastLightConfig    Mast Light Configuration    Drop down list    coded value    dMastLightConfig    III3D    Back, Side            
-    CantOver    Cantilever Over Thru Lanes    Number(2)    range    dRange0_4    III3C                
-    CantNotOver    Cantilever Not Over Thru Lanes    Number(2)    range    dRange0_4    III3C                this the number of cantilvever structures over a turn lane, parking lane, auxillary lane, shoulder, or other than the thru lanes.  
-    CantOverType    Cantilever Flashing Light    Drop down list    coded value    dLightType    III3C    Incandescent, LED, Both            
-    NoGatesRd    Number of Gates Roadway    Number(2)    range    dRange0_8    III 3 A                
-    NoGatesPed    Number of Gates Sidewalk    Number(2)    range    dRange0_8    III 3 A                
-    GateLight    Gate Mounted Flashing Lights    boolean    coded value    dYesNo                Yes, No    
-    Horn    Wayside Horn    boolean    coded value    dYesNo    III3G                
-    Bells    Bells    Number    range    dRange0_4    III3I                
-    QuadGates    Four Quad Gates Present    boolean    coded value    dYesNo        Yes, No        Yes, No    
-    GateChan    Channelization with Gates    Text(4)    coded value    dSideDesc    r    Both Sides, One Side, Neither Side        Both Sides, One Side, Neither Side    
-    TrafSig    Traffic Signals    Number(2)    range    dRange0_4                    how many traffic signals are acitvated by the train at the crossing?  Assume that any traffic signal is train activated. 
-    HwyTrafSig    Highway Traffic Signals controling crossing    boolean    coded value    dYesNo    III3H                
-    FlshOthr    Other Flashing Lights    Number(2)    range    dRange0_12    III3K                 
-    FlshOthrTyp    Other Flashing Lights Type    Text(12)        dFlashType        No Turn, No Left Turn, No Right Turn, None, Red, School Zone, Truck Yard, Yellow        No Turn, No Left Turn, No Right Turn, None, Red, School Zone, Truck Yard, Yellow    
-    WInstallDate    Warning Device Installation Date    Date            III 3 F                
-    WInstallProj    Warning Device Installation Project ID    text(9)                            
-                                        
-                                        
-def Signage                                        
-    W10_1    Advanced Warning Sign W10-1 Count    Number    range    dRange0_6                    
-    W10_1a    yellow exempt warning sign    Number    range    dRange0_6                    
-    W10_2    Advanced Warning Sign W10-2 Count    Number    range    dRange0_6                    
-    W10_3    Advanced Warning Sign W10-3 Count    Number    range    dRange0_6                    
-    W10_4    Advanced Warning Sign W10-4 Count    Number    range    dRange0_6                    
-    W10_11    Advanced Warning Sign W10-11 Count    Number    range    dRange0_6                    
-    W10_12    Advanced Warning Sign W10-12 Count    Number    range    dRange0_6                    
-    W10_5    Hump Crossing Sign    Number    range    dRange0_6                    
-    R15_3    white exempt sign on crossbuck    boolean    coded value    dYesNo                    
-    AdvWrnSgnRef    Advanced Warning Signs Reflectivity    boolean    coded value    dYesNo                Yes, No    
-    PostedNo    Crossing number Posted    boolean    coded value    dYesNo                Yes, No    
-    HumpSign    Hump Signs Indicator    boolean    coded value    dYesNo                Yes, No    
-    StopSign    Stop Signs    Number(2)    range    dRange0_5                    
-    YieldSign    Yield Signs    Number(2)    range    dRange0_5                    
-    NoESNSign    How many ENS signs posted    Number    range    dRange0_5                    
-    EmgcySgn    Emergency Signs (ENS/DOT) 1-13    text    coded value    dRailPhone        Telephone Number list        Telephone Number list    
-    MUTCD1    Other Sign MUTCD 1    Number(2)    range    dRange0_2                    
-    MUTCDTyp1    Other Sign MUTCD Type 1    Drop down list    coded value    dMUTCDCode        MUTCD signage number list        MUTCD signage number list    
-    MUTCD2    Other Sign MUTCD 2    Number(2)    range    dRange0_2                    
-    MUTCDTyp2    Other Sign MUTCD Type 2    Drop down list    coded value    dMUTCDCode        MUTCD signage number list        MUTCD signage number list    
-    MUTCD3    Other Sign MUTCD 3    Number(2)    range    dRange0_2                    
-    MUTCDTyp3    Other Sign MUTCD Type 3    Drop down list    coded value    dMUTCDCode        MUTCD signage number list        MUTCD signage number list    
-                                        
-                                        
-def Road Node                                        
-    PreDir    Prefix Direction of Street    Text(2)    coded value    dDirection        East, North, Northeast, Northwest, South, Southeast, Southwest, West            
-    StrName    Street Name    Text(64)                            
-    StrType    Street Type    Text(10)    coded value    dStrType        Avenue, Boulevard, Circle, Drive, Highway, Lane, Parkway, Place, Road, Street, Terrace, Way        Avenue, Boulevard, Circle, Drive, Highway, Lane, Parkway, Place, Road, Street, Terrace, Way    
-    RoadType    Roadway Type    Text(2)    coded value    dRdType        CR, I, LS, SR, TR, US        County Road, Interstate, Local City Street, State Route, Toll Road, U. S. Highway System    
-    NoLanes    Traffic Lanes    Number(2,0)    range    dRange0_12                    
-    ShldWidth    Shoulder Width (Feet)    Number(2,0)    range    dRange0_12                    
-    ShldSurf    Shoulder Surface Indicator    boolean    coded value    dYesNo                Yes, No    
-    SpeedLim    Speed Limit    Number(2,0)    coded value    dSpeedLim        10,15,20,25,30,35,40,45,50,55,60,65,70,75,80            
-    SpeedReg    Speed Regulation    Text(2)    coded value    dSpeedReg        Posted, Statutory            
-    Turnout    Truck Turnout    boolean    coded value    dYesNo                Yes, No    
-    Curb    Curb Gutter    boolean    coded value    dYesNo                Yes, No    
-    NHS    Highway System    text(2)    coded value    dNHS        Interstate National Highway System, Non-Federal-Aid, Other Federal-Aid Highway-Not NHS, Other National Highway System        Interstate National Highway System, Non-Federal-Aid, Other Federal-Aid Highway-Not NHS, Other National Highway System    
-    EmergencyRoute    Emergency Services Route    boolean    coded value    dYesNo                    Route leads to an emergency service such as Hospital, Police, or Fire Station
-    UrbanCode    Urban Rural    text(1)    coded value    dUrbanRural        Urban, Rural            
-    Funclass    Functional Classification    text(1)    coded value    dFUN        1 Interstate, 2 Other Freeway and Exressway, 3 Other Principal Arterial, 4 Minor Arterial, 5 Major Collector, 6 Minor Collector, 7 Local        Rural Interstate 11, Rural Local Roads 31, Rural Major Collectors 21, Rural Minor Arterials 13, Rural Minor Collectors 22, Rural Other Pricipal Arterial 12, Urban Collectors 61, Urban Freeways and Expressways 52, Urban Interstate 51, Urban Local Streets 71, Urban Minor Arterials 54, Urban Other Principal Arterials 53    
-    Sidewalk    Sidewalk    Text(4)    coded value    dSideDesc                Both Sides, One Side, Neither Side    
-    PavMark    Pavement Markings    text(12)    coded value    dApproach    III.2F    Approach Side Only, Both Approach and Depart Sides, Depart Side only, Neither Approach nor Depart Sides        Approach Side Only, Both Approach and Depart Sides, Depart Side only, Neither Approach not Depart Sides    
-    PavMarkStop    Stopline Pavement Markings    text(12)    coded value    dApproach    III.2F, III5            Approach Side Only, Both Approach and Depart Sides, Depart Side only, Neither Approach not Depart Sides    
-    Channels    ChannelizationDevices    text(12)    coded value    dApproach    III.2G                
-    Medians    ChannelizationMedians    boolean    coded value    dYesNo    III.2G                
-    Passing    No Passing Lines    text(12)    coded value    dApproach                Approach Side Only, Both Approach and Depart Sides, Depart Side only, Neither Approach not Depart Sides    
-    HwySigs    Nearby Highway Intersection Signals    boolean    coded value    dYesNo    III4a                
-    AppHwyInt    Approach Nearby Intersecting Highway    Number(3,1)    range    dLength500                The measurement or No intersection within 500 feet of crossing (-1 = no)    
-    AppSurfType    Approach Roadway Surface Type    Text(12)    coded value    dMaterial                Asphalt, Brick, Concrete, Earth, Gravel    
-    AppHwySigs    Approach Intersecting Highway Signals    boolean    coded value    dYesNo                Yes, No    
-    DepHwyInt    Depart Nearby Intersecting Highway    Number(3,1)    range    dLength500                The measurement or No intersection within 500 feet of crossing (-1 = no)    
-    DepSurfType    Depart Roadway Surface Type    Text(12)    coded value    dMaterial                Asphalt, Brick, Concrete, Earth, Gravel    
-    DepHwySigs    Depart Intersecting Highway Signals    boolean    coded value    dYesNo                Yes, No    
-                                        
-def Rail Node                                        
-    OpCo    Operating Railroad Company    Text(12)    coded value            Railroad list for Kansas        Railroad list for Kansas    
-    MainTrk    Main Tracks    Number(2,0)    range    dRange0_5                    
-    OtherTrk    Other Tracks    Number(2,0)    range    dRange0_12                    
-    OtherTrkDesc    Other Tracks Description    text(12)    coded value    dTrackType        Industry, Siding, Transit, Yard         Industry, Siding, Transit, Yard     
-    Milepost    Railroad Milepost    Number(3,3)    range    dRange0_800                    
-    Notes    Notes    Text(750)                        Limited to 750 spaces    
-'''
+
+def GdbCreate():
+    CreateFileGDB_management(workspace, gdbname)
+    CreateFeatureclass_management(gdb, 'Crossings', 'POINT', '#', 'DISABLED', 'ENABLED', spatialCRS)
+
+def RestartGDB():
+    if Exists(gdb): 
+        Delete_management(workspace + '/'+gdbname+'.gdb')
+        print "Gdb deleted"
 
 if __name__ == '__main__':
     main()

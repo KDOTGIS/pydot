@@ -6,7 +6,7 @@ Created on Jun 8, 2016
 from arcpy import CreateEnterpriseGeodatabase_management
 database_platform="SQL_Server"
 instance_name=r"dt00ar56\GDB_PROD"
-database_name="Collector16A"
+database_name="Collector2016Beta"
 account_authentication="DATABASE_AUTH"
 database_admin="geo_admin"
 database_admin_password=raw_input('Enter the geo_admin password:')

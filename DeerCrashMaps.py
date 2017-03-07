@@ -10,7 +10,7 @@ off state highway system crash locations can be reviewed
 delete those from the publication map if appropriate
 
 to do:
-drop non-essential in_memory files asap
+drop non-essential in_memory files 
 
 @author: kyleg
 '''

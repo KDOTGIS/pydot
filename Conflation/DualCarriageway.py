@@ -37,7 +37,7 @@ def SecondaryDirectionFinder():
     #Locate Features Along Routes will calculate a +/- offset distance of the dual carriageway points from the CRND centerline
     LocateFeaturesAlongRoutes_lr("HighwayPoints", "SRND_NPD", "NE_UNIQUE", "500 Feet", "in_memory/HighwayPointsMeasures", "RID POINT MEAS", "ALL", "DISTANCE", "ZERO", "FIELDS", "M_DIRECTON")
     # Replace a layer/table view name with a path to a dataset (which can be a layer file) or create the layer/table view within the script
-# The following inputs are layers or table views: "HighwayPointsMeasures"
+    # The following inputs are layers or table views: "HighwayPointsMeasures"
     SelectLayerByAttribute_management(in_layer_or_view="HighwayPointsMeasures", selection_type="NEW_SELECTION", where_clause="""SUBSTRING( "RID", 1, 7) NOT  LIKE SUBSTRING("StateKey1", 1, 7)""")
 
     DeleteRows_management(in_rows="HighwayPointsMeasures")

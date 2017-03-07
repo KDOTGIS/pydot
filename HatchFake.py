@@ -7,13 +7,14 @@ the points can be symbolically displayed as route hatches for web mapping
 '''
 
 #import arcpy
-from arcpy import (AddField_management, MakeFeatureLayer_management, CreateTable_management,da, Exists, 
+from arcpy import (AddField_management, MakeFeatureLayer_management, CreateTable_management,da, Exists, AddXY_management,
 TruncateTable_management, Append_management, MakeRouteEventLayer_lr, Delete_management, FeatureClassToFeatureClass_conversion, env)
 #set the geodatabase parameters for the input route data
 env.overwriteOutput = True
-wsPath = r"Database Connections\shared@sqlgisprod_GIS_cansys.sde" #enter the workspace path that has the data owner login
-StatefcRoutes = r"\\gisdata\arcgis\GISdata\Connection_files\RO@sqlgisprod_GIS_cansys.sde\GIS_CANSYS.SHARED.SMLRS"
-CountyfcRoutes = r"\\gisdata\arcgis\GISdata\Connection_files\RO@sqlgisprod_GIS_cansys.sde\GIS_CANSYS.SHARED.CMLRS"
+wsPath = r"Database Connections\shared@SQLGIS_cansys_gis_dev.sde" #enter the workspace path that has the data owner login
+StatefcRoutes = r"\\gisdata\arcgis\GISdata\Connection_files\RO@sqlgisprod_GIS_cansys.sde\GIS_CANSYS.SHARED.SMLRS"  # State Route feature class with begin/end attribs 
+CountyfcRoutes = r"\\gisdata\arcgis\GISdata\Connection_files\RO@sqlgisprod_GIS_cansys.sde\GIS_CANSYS.SHARED.CMLRS"  #County Route Feature Class with begin/end attribs 
+#State and County are the Two main Linear Referecing Methods used by KDOT which will be hatched
 StateOutTable = "SMHatch"
 CountyOutTable=  "CMHatch"
 StateFields = ["LRS_Route", "BEG_STATE_LOGMILE", "END_STATE_LOGMILE"]
@@ -46,10 +47,6 @@ for method in LRMethod:
     mem_table = r"in_memory\\"+mem_table
     AddField_management(mem_table, "RouteID", "TEXT")
     AddField_management(mem_table, "LogMile", "Double")
-        #add the route ID and event logmile fields
-    
-    #first, serach cursor through each LRS Key in the route layer
-    #with da.SearchCursor("RouteLyr", (fields)) as search:  # @UndefinedVariable
     
     for row in sorted(da.SearchCursor("RouteLyr", (method[2]))): # @UndefinedVariable
         LRSKEY = row[0]
@@ -88,7 +85,8 @@ for method in LRMethod:
             del maxlog
         
     MakeRouteEventLayer_lr("RouteLyr", method[2][0], mem_table, "RouteID POINT LogMile", "HatchPoints_events", "", "ERROR_FIELD", "ANGLE_FIELD", "NORMAL", "COMPLEMENT", "LEFT", "POINT")
-    
+    #add XY points, later on these coordinates can be used to hyperlink to google street view, bing maps, etc.  Make sure we are in NAD83 Lat/Long CRS here.
+    AddXY_management("HatchPoints_events")
     try:
         Delete_management(wsPath+'//'+method[1])
         FeatureClassToFeatureClass_conversion("HatchPoints_events", wsPath, method[1], "LOC_ERROR = 'NO ERROR'")

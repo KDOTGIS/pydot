@@ -18,17 +18,17 @@ except:
 
 from arcpy import da, env, Point, MakeQueryTable_management, GetCount_management, Delete_management, FeatureClassToFeatureClass_conversion, DeleteRows_management, Append_management, MakeXYEventLayer_management, ExecuteError, GetMessages, MakeFeatureLayer_management, CalculateField_management, AddJoin_management, MakeTableView_management,SelectLayerByAttribute_management
 
-fc = r'Database Connections\sdeprod_ciims.sde\CIIMS.CIIMS\CIIMS.Static_Crossings'
+fc = r'D:\SCHED\sdeprod_CIIMS.sde\CIIMS.CIIMS\CIIMS.Static_Crossings'
 fields = ('CROSSINGLONGITUDE', 'CROSSINGLATITUDE', 'SHAPE@XY', 'LOADDATE')
-tbl = r'Database Connections\sdeprod_CIIMS.sde\CIIMS.CIIMS_VWCROSSINGGIS3'
+tbl = r'D:\SCHED\sdeprod_CIIMS.sde\CIIMS.CIIMS_VWCROSSINGGIS3'
 layer_name = 'Static_Crossings'
 table_name = 'vwcrossings3'
-workspace = r'Database Connections\sdeprod_ciims.sde'
+workspace = r'D:\SCHED\sdeprod_CIIMS.sde'
 env.overwriteOutput=1
 #view that shows rows to be inserted, based on ID joins not matching
-newtbl = r'Database Connections\sdeprod_ciims.sde\CIIMS.NEWROWS'
+newtbl = r'D:\SCHED\sdeprod_CIIMS.sde\CIIMS.NEWROWS'
 #view that shows rows to be deleted, based on ID joins not matching
-deltbl = r'Database Connections\sdeprod_ciims.sde\CIIMS.DELROWS'
+deltbl = r'D:\SCHED\sdeprod_CIIMS.sde\CIIMS.DELROWS'
 
 def PointDelete(fc, layer_name, deltbl, table_name):
     #delete rows from SDE CIIMS that are removed from CANSYS CIIMS
@@ -171,6 +171,33 @@ def PointGEOM(fc, tbl, workspace, layer_name, fields):
                             scriptFailure, startingTime,
                             endingTime, GetMessages(2))
 
+#def ChangeTables():
+#    import cx_Oracle
+#    sdedev = cx_Oracle.connect('CIIMS/SMIIC@SDEPROD')
+#    
+#    newrows = '''CREATE OR REPLACE VIEW CIIMS.NEWROWS AS
+#    SELECT c1.CROSSINGID,
+#           c1.CROSSINGLATITUDE,
+#           c1.CROSSINGLONGITUDE,
+#           c1.CROSSINGTYPE
+#    FROM CIIMS.CIIMS_VWCROSSINGGIS3 c1
+#           LEFT JOIN CIIMS.Static_Crossings s1 ON c1.CROSSINGID = s1.CROSSINGID
+#    WHERE s1.CROSSINGID IS NULL;
+#     '''
+#     delrows = '''CREATE OR REPLACE VIEW CIIMS.DELROWS AS
+#    SELECT c1.CROSSINGID,
+#           c1.OBJECTID,
+#           c1.CROSSINGLONGITUDE,
+#      FROM CIIMS.Static_Crossings  c1
+#           LEFT JOIN CIIMS.CIIMS_VWCROSSINGGIS3 s1 ON c1.CROSSINGID = s1.CROSSINGID
+#     WHERE s1.CROSSINGID IS NULL;
+#     '''
+#    cur1.execute(newrows)
+#    cur1.execute(delrows)
+
+
+
+
 if __name__ == '__main__':
     
     MakeTableView_management(deltbl, "delcheck")
@@ -195,6 +222,9 @@ if __name__ == '__main__':
     AttribFields(fc, tbl, layer_name, table_name, workspace)
     #PointCheck(fc, fields, layer_name)
     endingTime = datetime.datetime.now()
-    ScriptStatusLogging('POINT_UPDATE_PROD.py', 'CIIMS.Static_Crossings',
+    try:
+        ScriptStatusLogging('POINT_UPDATE_PROD.py', 'CIIMS.Static_Crossings',
                             scriptSuccess, startingTime,
                             endingTime, 'Completed Successfully')    
+    except:
+        print "script logging problem"
