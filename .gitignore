@@ -1,0 +1,5 @@
+SECURE/
+sde_connections_10.3/
+*.mdb
+*.gdb
+*.zip
