@@ -1,4 +1,8 @@
 '''
+Created from Eliminate Overlaps, modivided to work and populate non primary route key
+
+
+
 Created on Feb 7, 2017
 This script prepares the conflation data for route creation
 conflation road data representing the state highway system is copied toin-memory for fast processing 
