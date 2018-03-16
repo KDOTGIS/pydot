@@ -1,25 +1,26 @@
 '''
 Created on Mar 6, 2018
-this script creates a new file geodatabase in ArcGIS Pro from the data in dt00ar68 - roads
+The script creates a new file geodatabase in ArcGIS Pro from the data in dt00ar58 - roads
+Then, it updates the file sources in the master project to use that new file geodatabase
+after running this, you can run the scipt "Share Pro Project" to package and share the project and file geodatabase to the QAQC group
 @author: kyleg
 '''
 
 import datetime, time
-from KhubCode25.KhubCode25Config import countylines
 startDateTime = datetime.datetime.now()
-#print(currentDateTime)
+print("File update started at "+ str(startDateTime)+ ", it usually takes about 5 minutes")
 #formattedDateStr = startDateTime.strftime("%m-%d-%Y")
 
 def UpdateLocalFileGDB():
     from arcpy import FeatureClassToFeatureClass_conversion, CreateFileGDB_management, Exists, Delete_management
     from KhubCode25.KhubCode25Config import (
-    localProProjectPath, 
-    localProFileGDBWorkspace, 
-    prodDataSourceSDE, 
-    devDataSourceSDE, 
-    dbname, 
-    dbownername, 
-    countylines)
+    localProProjectPath, localProFileGDBWorkspace, prodDataSourceSDE, devDataSourceSDE, dbname, dbownername, countylines, devorprod)
+    if devorprod == 'prod':
+        database = prodDataSourceSDE
+        print("running on "+devorprod)
+    else: 
+        database = devDataSourceSDE
+        print("running on "+devorprod)
     fileformatDateStr = startDateTime.strftime("%Y%m%d")
     localfilegdb = localProFileGDBWorkspace+'\\'+'KhubRoadCenterlines'+fileformatDateStr+'.gdb'
     #print(fileformatDateStr)
@@ -28,11 +29,11 @@ def UpdateLocalFileGDB():
         Delete_management(localfilegdb)
         time.sleep(1)
     CreateFileGDB_management(localProFileGDBWorkspace, "KhubRoadCenterlines"+fileformatDateStr, "CURRENT")
-    FeatureClassesFromProd = ['All_Road_Centerlines', 'All_Roads_Stitch_Points', 'Videolog_CURRENT_LANETRACE', 'Videolog_CURRENT_RAMPTRACE', 'HPMS_RAMPS']
-    for FeatureClass in FeatureClassesFromProd:
-        loopFC = localProProjectPath+'/'+prodDataSourceSDE+"/"+dbname+"."+dbownername+"."+FeatureClass
+    FeatureClassesUsed = ['All_Road_Centerlines', 'All_Roads_Stitch_Points', 'Videolog_CURRENT_LANETRACE', 'Videolog_CURRENT_RAMPTRACE', 'HPMS_RAMPS']
+    for FeatureClass in FeatureClassesUsed:
+        loopFC = localProProjectPath+'/'+database+"/"+dbname+"."+dbownername+"."+FeatureClass
         FeatureClassToFeatureClass_conversion(loopFC, localfilegdb, FeatureClass)
-    FeatureClassToFeatureClass_conversion(localProProjectPath+'/'+countylines, localfilegdb, "Shared_County_Lines")
+    FeatureClassToFeatureClass_conversion(localProProjectPath+'/'+countylines, localfilegdb, "SHARED_COUNTY_LINES")
     
 def UpdateProjectDataSources():
     from KhubCode25.KhubCode25Config import localProProjectPath, localProProjectName, localProFileGDBWorkspace
@@ -42,7 +43,7 @@ def UpdateProjectDataSources():
     aprx = mp.ArcGISProject(localProProjectPath+'/'+localProProjectName)
     LocalMaps = aprx.listMaps("1SpatialLocal*")
     for Localmap in LocalMaps:
-        print(Localmap)
+        #print(Localmap)
         lyrlist =  Localmap.listLayers("*")
         #for layer in lyrlist:
             #conprops= layer.connectionProperties
@@ -50,22 +51,21 @@ def UpdateProjectDataSources():
                 #print(conprops)
         #use the first layer to as the file geodatabase name to update the source file geodatabse for each local map
         conprops = (lyrlist[0].connectionProperties)      
-        print(conprops)
-        print(conprops['connection_info']['database'])  
+        #print(conprops)
+        #print(conprops['connection_info']['database'])  
         firstdb = conprops['connection_info']['database']
         aprx.updateConnectionProperties(firstdb, localfilegdb)
-        
     aprx.save()
 
 def main():
-    #UpdateLocalFileGDB()
+    UpdateLocalFileGDB()
     UpdateProjectDataSources()
     
 if __name__ == '__main__':
-    #print(datetime.datetime.now())
-    #print("this is the main section")
     main()
     #print(datetime.datetime.now())
     print('program executed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))
+    print("but that time calculation seems way off for this script")
 else:
     print("this is the else section")
+    #this take usually takes about 5-7 minutes to complete.
