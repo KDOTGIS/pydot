@@ -14,27 +14,23 @@ originally reCreated on Feb 7, 2017
 Created from Eliminate Overlaps, modifided to work and populate non primary route key
 This script prepares the conflation data for route creation
 '''
-import datetime
-startDateTime = datetime.datetime.now()
-print("starting calibration at "+str(startDateTime)+", it should take about 10-30 minutes to calibration state system routes")
-#Calibration process completed in 0:03:36.252839 hours, minutes, seconds
-import getpass
-fileformatDateStr = startDateTime.strftime("%Y%m%d")
-from KhubCode25.KhubCode25Config import devorprod, dbname, dbownername, localProFileGDBWorkspace, devDataSourceSDE, prodDataSourceSDE, KDOTConnections, Cmlrs, devSqlDSN, prodSqlDSN
-username = dbownername
-password = getpass.getpass("Enter Password for "+str(username)+":")
-if devorprod == 'prod':
-    database = prodDataSourceSDE
-    dsn = prodSqlDSN
-    print("running on "+devorprod)
-else: 
-    database = devDataSourceSDE
-    dsn = devSqlDSN
-    print("running on "+devorprod)
 
 def StateHighwayCalibrate():
+    import datetime
+    startDateTime = datetime.datetime.now()
+    print("starting calibration at "+str(startDateTime)+", it should take about 10-30 minutes to calibration state system routes")
+#Calibration process completed in 0:03:36.252839 hours, minutes, seconds
+    from KhubCode25.KhubCode25Config import devorprod, dbname, dbownername, localProFileGDBWorkspace, KDOTConnections, Cmlrs, prodDataSourceSDE, devDataSourceSDE
+    fileformatDateStr = startDateTime.strftime("%Y%m%d")
     #theStateHighwaySegments is defined as the roadway segments intended for calibration to the EXOR measures
-    
+    if devorprod == 'prod':
+        database = prodDataSourceSDE
+
+        print("running on "+devorprod)
+    else: 
+        database = devDataSourceSDE
+
+        print("running on "+devorprod)
     from arcpy import FeatureClassToFeatureClass_conversion, Delete_management, FeatureVerticesToPoints_management, LocateFeaturesAlongRoutes_lr, CreateFileGDB_management, env, MakeFeatureLayer_management, SelectLayerByAttribute_management, DeleteRows_management, MakeTableView_management  
     env.overwriteOutput=1
     try:
@@ -110,6 +106,24 @@ def CalcUsingSQLserver():
     #Propy will not load pymssql package for some reason
     #new plan on 3/13/2018 - use pyodbc and system DSN to connect to SQL Server, because it works.
     #another option to test someday might be http://desktop.arcgis.com/en/arcmap/latest/analyze/arcpy-classes/arcsdesqlexecute.htm
+    import datetime
+    startDateTime = datetime.datetime.now()
+    print("starting SQL calculation at "+str(startDateTime)+", it should take about 10-30 minutes to calibration state system routes")
+    #Calibration process completed in 0:03:36.252839 hours, minutes, seconds
+    import getpass
+    fileformatDateStr = startDateTime.strftime("%Y%m%d")
+    from KhubCode25.KhubCode25Config import devorprod, dbname, dbownername, localProFileGDBWorkspace, devDataSourceSDE, prodDataSourceSDE, KDOTConnections, devSqlDSN, prodSqlDSN
+
+    username = dbownername
+    password = getpass.getpass("Enter Password for "+str(username)+":")
+    if devorprod == 'prod':
+        database = prodDataSourceSDE
+        dsn = prodSqlDSN
+        print("running on "+devorprod)
+    else: 
+        database = devDataSourceSDE
+        dsn = devSqlDSN
+        print("running on "+devorprod)
 
     import pyodbc  # @UnresolvedImport for pydev/eclipse
     from arcpy import Delete_management, TableToTable_conversion, Exists
@@ -165,6 +179,10 @@ def main():
     CalcUsingSQLserver()
     
 if __name__ == '__main__':
+    import datetime
+    startDateTime = datetime.datetime.now()
+    print("starting calibration at "+str(startDateTime)+", it should take about 10-30 minutes to calibration state system routes")
+#Calibration process completed in 0:03:36.252839 hours, minutes, seconds
     main()
     #print(datetime.datetime.now())
     print('Calibration process completed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))

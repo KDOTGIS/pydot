@@ -18,15 +18,17 @@ an editable feature service from ArcGIS server.  To accomodate this script, thos
 
 @author: kyleg
 '''
-import datetime
-startDateTime = datetime.datetime.now()
-print ("this script takes about 8 minutes")
-import getpass
-username = "kyle.gonterwitz_KSDOT"
-password = getpass.getpass("Enter Password for "+str(username)+":")
-print("logging in as "+username )
+
+
    
 def ShareProToOnline():
+    import datetime
+    startDateTime = datetime.datetime.now()
+    print ("this script takes about 8 minutes")
+    import getpass
+    username = "kyle.gonterwitz_KSDOT"
+    password = getpass.getpass("Enter Password for "+str(username)+":")
+    print("logging in as "+username )
     from arcpy import PackageProject_management, SharePackage_management, os, env
     env.overwriteOutput = True
     #import getpass
@@ -45,7 +47,8 @@ def ShareProToOnline():
 def main():
     ShareProToOnline()
     
-    
 if __name__ == '__main__':
+    import datetime
+    startDateTime = datetime.datetime.now()
     main()
     print('project packaged and shared in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))

@@ -16,10 +16,12 @@ import KhubCode25.KhubUpdateFileGDB
 import KhubCode25.KhubShareProProject
 
 def main():
-    KhubCode25.KhubUpdateLRSKeyFields()
-    KhubCode25.KhubCalibrateSourceToControl()
-    KhubCode25.KhubUpdateFileGDB()
-    KhubCode25.KhubShareProProject()
+    KhubCode25.KhubUpdateLRSKeyFields.SqlUpdateLRSKeys()
+    KhubCode25.KhubCalibrateSourceToControl.StateHighwayCalibrate()
+    KhubCode25.KhubCalibrateSourceToControl.CalcUsingSQLserver()
+    KhubCode25.KhubUpdateFileGDB.UpdateLocalFileGDB()
+    KhubCode25.KhubUpdateFileGDB.UpdateProjectDataSources()
+    KhubCode25.KhubShareProProject.ShareProToOnline()
     
 if __name__ == '__main__':
     pass

@@ -6,11 +6,6 @@ after running this, you can run the scipt "Share Pro Project" to package and sha
 @author: kyleg
 '''
 
-import datetime, time
-startDateTime = datetime.datetime.now()
-print("File update started at "+ str(startDateTime)+ ", it usually takes about 5 minutes")
-#formattedDateStr = startDateTime.strftime("%m-%d-%Y")
-
 def UpdateLocalFileGDB():
     from arcpy import FeatureClassToFeatureClass_conversion, CreateFileGDB_management, Exists, Delete_management
     from KhubCode25.KhubCode25Config import (
@@ -62,6 +57,10 @@ def main():
     UpdateProjectDataSources()
     
 if __name__ == '__main__':
+    import datetime, time
+    startDateTime = datetime.datetime.now()
+    print("File update started at "+ str(startDateTime)+ ", it usually takes about 5 minutes")
+#formattedDateStr = startDateTime.strftime("%m-%d-%Y")
     main()
     #print(datetime.datetime.now())
     print('program executed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))
