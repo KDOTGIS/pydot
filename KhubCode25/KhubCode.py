@@ -6,7 +6,7 @@ next update calibrations
 next update local files and the pro project
 next package and share the pro project to the online group
 run 1spatial from the server.
-
+updated 3/28/2018
 
 @author: kyleg
 '''
