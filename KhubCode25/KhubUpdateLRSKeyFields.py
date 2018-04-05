@@ -7,13 +7,15 @@ seems like pyodbc works almost exactly the same as _mssql other than the actual 
 @author: kyleg
 '''
 
-import datetime
-startDateTime = datetime.datetime.now()
+
 
 
 def SqlUpdateLRSKeys():
+    import datetime
+    startDateTime = datetime.datetime.now()
     import pyodbc  # @UnresolvedImport for pydev/eclipse
     import getpass
+    print('Updating LRS Keys with SQL, it should take a few seconds...starting at {}'.format(datetime.datetime.now()))
     from KhubCode25.KhubCode25Config import devorprod, dbownername, devSqlDSN, prodSqlDSN
     if devorprod == 'prod':
         database = prodSqlDSN
@@ -36,11 +38,10 @@ def SqlUpdateLRSKeys():
                 AND [KDOT_LRS_KEY]<> CONCAT([LRS_COUNTY_PRE], [LRS_ROUTE_PREFIX], [LRS_ROUTE_NUM],[LRS_ROUTE_SUFFIX],[LRS_UNIQUE_IDENT], '-',[LRS_DIRECTION])
 
         UPDATE [Roads].[sde].[ALL_ROAD_CENTERLINES]
-            SET [Target_LRSKEY_Temp1]= SUBSTRING([LRS_ROUTE_NUM_TARGET], PATINDEX('%[^0]%', [LRS_ROUTE_NUM_TARGET]+'.'), LEN([LRS_ROUTE_NUM_TARGET]))
+            SET [Target_LRSKEY_Temp1] = CONCAT([LRS_COUNTY_PRE],[ROUTE_PREFIX_TARGET],REPLICATE('0',5-LEN(RTRIM([LRS_ROUTE_NUM_TARGET]))) + RTRIM([LRS_ROUTE_NUM_TARGET]),[LRS_ROUTE_SUFFIX],[KDOT_DIRECTION_CALC],[LRS_UNIQUE_TARGET])
                 WHERE 1=1
-                AND [ROUTE_PREFIX_TARGET] in ('1', '2', '3')
-                AND LEFT(LRS_ROUTE_NUM_TARGET,1)='0'
-                
+                AND [Target_LRSKEY_Temp1] <> CONCAT([LRS_COUNTY_PRE],[ROUTE_PREFIX_TARGET],REPLICATE('0',5-LEN(RTRIM([LRS_ROUTE_NUM_TARGET]))) + RTRIM([LRS_ROUTE_NUM_TARGET]),[LRS_ROUTE_SUFFIX],[KDOT_DIRECTION_CALC],[LRS_UNIQUE_TARGET])
+
         UPDATE [Roads].[sde].[ALL_ROAD_CENTERLINES]
             SET [KDOT_LRS_KEY] = CONCAT([LRS_COUNTY_PRE], [LRS_ROUTE_PREFIX], [LRS_ROUTE_NUM],[LRS_ROUTE_SUFFIX],[LRS_UNIQUE_IDENT],[LRS_ADMO],[KDOT_DIRECTION_CALC]) 
                 WHERE 1=1
@@ -58,6 +59,7 @@ def SqlUpdateLRSKeys():
     cursor.execute("COMMIT")
     cursor.close()
     del cursor
+    #print('SQL update query completed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime()))
   
 def main():
     #UpdateLRSKeyFieldsSQL()
@@ -68,6 +70,7 @@ if __name__ == '__main__':
     #print("this is the main section")
     main()
     #print(datetime.datetime.now())
-    print('SQL update query completed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))
+    
 else:
     print("this is the else section")
+    

@@ -22,6 +22,9 @@ def main():
     KhubCode25.KhubUpdateFileGDB.UpdateLocalFileGDB()
     KhubCode25.KhubUpdateFileGDB.UpdateProjectDataSources()
     KhubCode25.KhubShareProProject.ShareProToOnline()
+    print ("all done")
+    
+main()
     
 if __name__ == '__main__':
     pass

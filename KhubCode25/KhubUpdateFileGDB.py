@@ -7,6 +7,8 @@ after running this, you can run the scipt "Share Pro Project" to package and sha
 '''
 
 def UpdateLocalFileGDB():
+    import datetime, time
+    fDateTime = datetime.datetime.now()
     from arcpy import FeatureClassToFeatureClass_conversion, CreateFileGDB_management, Exists, Delete_management
     from KhubCode25.KhubCode25Config import (
     localProProjectPath, localProFileGDBWorkspace, prodDataSourceSDE, devDataSourceSDE, dbname, dbownername, countylines, devorprod)
@@ -16,7 +18,7 @@ def UpdateLocalFileGDB():
     else: 
         database = devDataSourceSDE
         print("running on "+devorprod)
-    fileformatDateStr = startDateTime.strftime("%Y%m%d")
+    fileformatDateStr = fDateTime.strftime("%Y%m%d")
     localfilegdb = localProFileGDBWorkspace+'\\'+'KhubRoadCenterlines'+fileformatDateStr+'.gdb'
     #print(fileformatDateStr)
     if Exists(localfilegdb):
@@ -24,16 +26,18 @@ def UpdateLocalFileGDB():
         Delete_management(localfilegdb)
         time.sleep(1)
     CreateFileGDB_management(localProFileGDBWorkspace, "KhubRoadCenterlines"+fileformatDateStr, "CURRENT")
-    FeatureClassesUsed = ['All_Road_Centerlines', 'All_Roads_Stitch_Points', 'Videolog_CURRENT_LANETRACE', 'Videolog_CURRENT_RAMPTRACE', 'HPMS_RAMPS']
+    FeatureClassesUsed = ['All_Road_Centerlines', 'All_Road_Centerlines_D1', 'MARKUP_POINT', 'All_Roads_Stitch_Points', 'Videolog_CURRENT_LANETRACE', 'Videolog_CURRENT_RAMPTRACE', 'HPMS_RAMPS']
     for FeatureClass in FeatureClassesUsed:
         loopFC = localProProjectPath+'/'+database+"/"+dbname+"."+dbownername+"."+FeatureClass
         FeatureClassToFeatureClass_conversion(loopFC, localfilegdb, FeatureClass)
     FeatureClassToFeatureClass_conversion(localProProjectPath+'/'+countylines, localfilegdb, "SHARED_COUNTY_LINES")
     
 def UpdateProjectDataSources():
+    import datetime
     from KhubCode25.KhubCode25Config import localProProjectPath, localProProjectName, localProFileGDBWorkspace
     from arcpy import mp
-    fileformatDateStr = startDateTime.strftime("%Y%m%d")
+    fDateTime = datetime.datetime.now()
+    fileformatDateStr = fDateTime.strftime("%Y%m%d")
     localfilegdb = localProFileGDBWorkspace+'\\'+'KhubRoadCenterlines'+fileformatDateStr+'.gdb'
     aprx = mp.ArcGISProject(localProProjectPath+'/'+localProProjectName)
     LocalMaps = aprx.listMaps("1SpatialLocal*")
@@ -53,18 +57,19 @@ def UpdateProjectDataSources():
     aprx.save()
 
 def main():
-    UpdateLocalFileGDB()
-    UpdateProjectDataSources()
-    
-if __name__ == '__main__':
-    import datetime, time
+    import datetime
     startDateTime = datetime.datetime.now()
     print("File update started at "+ str(startDateTime)+ ", it usually takes about 5 minutes")
-#formattedDateStr = startDateTime.strftime("%m-%d-%Y")
-    main()
-    #print(datetime.datetime.now())
+    UpdateLocalFileGDB()
+    UpdateProjectDataSources()
     print('program executed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))
     print("but that time calculation seems way off for this script")
+    
+if __name__ == '__main__':
+    #formattedDateStr = startDateTime.strftime("%m-%d-%Y")
+    main()
+    #print(datetime.datetime.now())
+
 else:
     print("this is the else section")
     #this take usually takes about 5-7 minutes to complete.

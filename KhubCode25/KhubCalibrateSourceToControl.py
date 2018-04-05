@@ -14,11 +14,26 @@ originally reCreated on Feb 7, 2017
 Created from Eliminate Overlaps, modifided to work and populate non primary route key
 This script prepares the conflation data for route creation
 '''
+def RM_Calibrate():
+    import datetime
+    startDateTime = datetime.datetime.now()
+    print("starting SHS calibration at "+str(startDateTime)+", it should take about 10-30 minutes to calibration state system routes")
+#Calibration process completed in 0:03:36.252839 hours, minutes, seconds
+    from KhubCode25.KhubCode25Config import devorprod, dbname, dbownername, localProFileGDBWorkspace, KDOTConnections, Cmlrs, prodDataSourceSDE, devDataSourceSDE
+    fileformatDateStr = startDateTime.strftime("%Y%m%d") 
+    from arcpy import Exists, FeatureClassToFeatureClass_conversion, Delete_management, FeatureVerticesToPoints_management, LocateFeaturesAlongRoutes_lr, CreateFileGDB_management, env, MakeFeatureLayer_management, SelectLayerByAttribute_management, DeleteRows_management, MakeTableView_management  
+ 
+    if Exists(localProFileGDBWorkspace+"KhubRoadCenterlinesTemp"+fileformatDateStr+".gdb"):
+        print("local temp proc db exists"+localProFileGDBWorkspace+"/KhubRoadCenterlinesTemp"+fileformatDateStr)
+    else:
+        CreateFileGDB_management(localProFileGDBWorkspace, "KhubRoadCenterlinesTemp"+fileformatDateStr, "CURRENT")
+        print("creating a local temp calibration processing file geodatabase at"+localProFileGDBWorkspace+"called KhubRoadCenterlinesTemp"+fileformatDateStr)
+    
 
 def StateHighwayCalibrate():
     import datetime
     startDateTime = datetime.datetime.now()
-    print("starting calibration at "+str(startDateTime)+", it should take about 10-30 minutes to calibration state system routes")
+    print("starting SHS calibration at "+str(startDateTime)+", it should take about 10-30 minutes to calibration state system routes")
 #Calibration process completed in 0:03:36.252839 hours, minutes, seconds
     from KhubCode25.KhubCode25Config import devorprod, dbname, dbownername, localProFileGDBWorkspace, KDOTConnections, Cmlrs, prodDataSourceSDE, devDataSourceSDE
     fileformatDateStr = startDateTime.strftime("%Y%m%d")
@@ -181,7 +196,7 @@ def main():
 if __name__ == '__main__':
     import datetime
     startDateTime = datetime.datetime.now()
-    print("starting calibration at "+str(startDateTime)+", it should take about 10-30 minutes to calibration state system routes")
+    print("starting calibration at "+str(startDateTime)+", it should take about 5 minutes to calibrate state system routes")
 #Calibration process completed in 0:03:36.252839 hours, minutes, seconds
     main()
     #print(datetime.datetime.now())
