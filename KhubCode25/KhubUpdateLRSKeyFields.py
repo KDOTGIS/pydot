@@ -63,7 +63,7 @@ def SqlUpdateLRSKeys(DBPassword):
     cursor.execute("COMMIT")
     cursor.close()
     del cursor
-    #print('SQL update query completed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime()))
+    print('SQL update query completed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime()))
   
 def main():
     #UpdateLRSKeyFieldsSQL()

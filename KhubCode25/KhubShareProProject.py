@@ -18,9 +18,6 @@ an editable feature service from ArcGIS server.  To accomodate this script, thos
 
 @author: kyleg
 '''
-from asn1crypto._ffi import null
-
-
    
 def ShareProToOnline(KhubPassword):
     import datetime
