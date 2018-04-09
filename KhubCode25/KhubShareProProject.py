@@ -18,31 +18,46 @@ an editable feature service from ArcGIS server.  To accomodate this script, thos
 
 @author: kyleg
 '''
+from asn1crypto._ffi import null
 
 
    
-def ShareProToOnline():
+def ShareProToOnline(KhubPassword):
     import datetime
     startDateTime = datetime.datetime.now()
     print ("this script takes about 8 minutes")
-    import getpass
-    username = "kyle.gonterwitz_KSDOT"
-    password = getpass.getpass("Enter Password for "+str(username)+":")
-    print("logging in as "+username )
+
+
     from arcpy import PackageProject_management, SharePackage_management, os, env
     env.overwriteOutput = True
     #import getpass
-    from KhubCode25.KhubCode25Config import localProProjectPath, localProProjectName
+    from KhubCode25.KhubCode25Config import localProProjectPath, localProProjectName, AGOUser
     localproject = os.path.join(localProProjectPath,localProProjectName)
     print(localproject)
-    #p = mp.ArcGISProject(localproject)
-    fileformatDateStr = startDateTime.strftime("%Y%m%d")
-    summary = "This project contains maps that link to KDOT SQL Server databases AR58 gdb_prod, AR68 gdb_Dev, and a local file geodatabase copied from DT00ar58 gdb_prod for use on Amazon Servers or otherwise outside the KDOT network. The schema presentation matches the schema for the 1spatial extension.  For the local geodatabse copy, there is one map displaying highway symbols based on the source LRS network route prefix and direction, and another map displaying highway symbols based on the target network classification and direction"
+    print ("logging in as"+AGOUser)
+    try:
+        username = AGOUser
+        password = KhubPassword
+        fileformatDateStr = startDateTime.strftime("%Y%m%d")
+        summary = "This project contains maps that link to KDOT SQL Server databases AR58 gdb_prod, AR68 gdb_Dev, and a local file geodatabase copied from DT00ar58 gdb_prod for use on Amazon Servers or otherwise outside the KDOT network. The schema presentation matches the schema for the 1spatial extension.  For the local geodatabse copy, there is one map displaying highway symbols based on the source LRS network route prefix and direction, and another map displaying highway symbols based on the target network classification and direction"
     
-    PackageProject_management(localproject, r"C:\temp\KhubDataCleanup25_"+fileformatDateStr+".ppkx", "INTERNAL", "PROJECT_PACKAGE", "DEFAULT", "ALL", None, summary, "Khub", "CURRENT", "NO_TOOLBOXES", "NO_HISTORY_ITEMS", "READ_WRITE")
+        PackageProject_management(localproject, r"C:\temp\KhubDataCleanup25_"+fileformatDateStr+".ppkx", "INTERNAL", "PROJECT_PACKAGE", "DEFAULT", "ALL", None, summary, "Khub", "CURRENT", "NO_TOOLBOXES", "NO_HISTORY_ITEMS", "READ_WRITE")
         #SharePackage_management(SharePackage_management (localProProjectName, "KanDOT", password, summary, "Khub, 1spatial, Roads, Centerlines, LRS, Highways", "KANSAS DOT Restricted Use - 23 U.S.C. 409", "MYGROUPS", "Data Quality Assurance and Quality Control Group", "MYORGANIZATION"))
-    print("package created, now sharing")
-    SharePackage_management(r"C:\temp\KhubDataCleanup25_"+fileformatDateStr+".ppkx", username, password, summary, r"Khub,Project Package,ppkx,2D,ArcGIS Pro", "KDOT", "MYGROUPS", "Data Quality Assurance and Quality Control Group", "MYORGANIZATION")
+        print("package created, now sharing")
+        SharePackage_management(r"C:\temp\KhubDataCleanup25_"+fileformatDateStr+".ppkx", username, password, summary, r"Khub,Project Package,ppkx,2D,ArcGIS Pro", "KDOT", "MYGROUPS", "Data Quality Assurance and Quality Control Group", "MYORGANIZATION")
+    except:
+        import getpass
+        username = "kyle.gonterwitz_KSDOT"
+        password = getpass.getpass("Enter Password for "+str(username)+":")
+        print("logging in as "+username )
+        #p = mp.ArcGISProject(localproject)
+        fileformatDateStr = startDateTime.strftime("%Y%m%d")
+        summary = "This project contains maps that link to KDOT SQL Server databases AR58 gdb_prod, AR68 gdb_Dev, and a local file geodatabase copied from DT00ar58 gdb_prod for use on Amazon Servers or otherwise outside the KDOT network. The schema presentation matches the schema for the 1spatial extension.  For the local geodatabse copy, there is one map displaying highway symbols based on the source LRS network route prefix and direction, and another map displaying highway symbols based on the target network classification and direction"
+    
+        PackageProject_management(localproject, r"C:\temp\KhubDataCleanup25_"+fileformatDateStr+".ppkx", "INTERNAL", "PROJECT_PACKAGE", "DEFAULT", "ALL", None, summary, "Khub", "CURRENT", "NO_TOOLBOXES", "NO_HISTORY_ITEMS", "READ_WRITE")
+        #SharePackage_management(SharePackage_management (localProProjectName, "KanDOT", password, summary, "Khub, 1spatial, Roads, Centerlines, LRS, Highways", "KANSAS DOT Restricted Use - 23 U.S.C. 409", "MYGROUPS", "Data Quality Assurance and Quality Control Group", "MYORGANIZATION"))
+        print("package created, now sharing")
+        SharePackage_management(r"C:\temp\KhubDataCleanup25_"+fileformatDateStr+".ppkx", username, password, summary, r"Khub,Project Package,ppkx,2D,ArcGIS Pro", "KDOT", "MYGROUPS", "Data Quality Assurance and Quality Control Group", "MYORGANIZATION")
 
 def main():
     ShareProToOnline()
@@ -52,3 +67,5 @@ if __name__ == '__main__':
     startDateTime = datetime.datetime.now()
     main()
     print('project packaged and shared in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))
+else:
+    print("functions from KhubShareProProject imported to main script")

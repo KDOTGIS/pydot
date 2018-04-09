@@ -10,7 +10,7 @@ seems like pyodbc works almost exactly the same as _mssql other than the actual 
 
 
 
-def SqlUpdateLRSKeys():
+def SqlUpdateLRSKeys(DBPassword):
     import datetime
     startDateTime = datetime.datetime.now()
     import pyodbc  # @UnresolvedImport for pydev/eclipse
@@ -24,8 +24,12 @@ def SqlUpdateLRSKeys():
         database = devSqlDSN
         print("running on "+devorprod)
     username = dbownername
-    password = getpass.getpass("Enter Password for "+str(username)+":")
-    connectionstring = 'DSN='+database+';UID='+username+';PWD='+ password
+    try:
+        dbpassword = DBPassword
+    except:
+        dbpassword = getpass.getpass("Enter Password for "+str(username)+":")
+    
+    connectionstring = 'DSN='+database+';UID='+username+';PWD='+ dbpassword
     print(connectionstring)
     cnxn = pyodbc.connect(connectionstring)
     cursor = cnxn.cursor()

@@ -15,13 +15,24 @@ import KhubCode25.KhubCalibrateSourceToControl
 import KhubCode25.KhubUpdateFileGDB
 import KhubCode25.KhubShareProProject
 
+
+def CollectPasswords():
+    from KhubCode25.KhubCode25Config import AGOUser
+    import getpass
+    username = AGOUser
+    password = getpass.getpass("Enter Password for "+str(username)+":")
+    print("logging in as "+username )
+    dbpassword = getpass.getpass("Enter Password for SDE user on the Geodatabase:")
+    return password, dbpassword
+
 def main():
-    KhubCode25.KhubUpdateLRSKeyFields.SqlUpdateLRSKeys()
+    
+    KhubCode25.KhubUpdateLRSKeyFields.SqlUpdateLRSKeys(CollectPasswords()[1])
     KhubCode25.KhubCalibrateSourceToControl.StateHighwayCalibrate()
-    KhubCode25.KhubCalibrateSourceToControl.CalcUsingSQLserver()
+    KhubCode25.KhubCalibrateSourceToControl.CalcUsingSQLserver(CollectPasswords()[1])
     KhubCode25.KhubUpdateFileGDB.UpdateLocalFileGDB()
     KhubCode25.KhubUpdateFileGDB.UpdateProjectDataSources()
-    KhubCode25.KhubShareProProject.ShareProToOnline()
+    KhubCode25.KhubShareProProject.ShareProToOnline(CollectPasswords[0])
     print ("all done")
     
 main()

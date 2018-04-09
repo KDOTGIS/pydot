@@ -16,3 +16,5 @@ countylines = r"sdeprod_shared.sde\SHARED.COUNTY_LINES"
 prodSqlDSN = 'dt00ar58_gdb_prod_sde_roads'
 devSqlDSN = 'dt00ar68_gdb_dev_sde_roads'
 Cmlrs = r'CMLRS_2017'
+RHXML = r'KHUB20.XML'
+AGOUser =r"kyle.gonterwitz_KSDOT"

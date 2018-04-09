@@ -71,5 +71,5 @@ if __name__ == '__main__':
     #print(datetime.datetime.now())
 
 else:
-    print("this is the else section")
+    print("Functions from KhubFileGDB imported to main script")
     #this take usually takes about 5-7 minutes to complete.
