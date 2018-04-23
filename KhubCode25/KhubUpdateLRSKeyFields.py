@@ -7,10 +7,8 @@ seems like pyodbc works almost exactly the same as _mssql other than the actual 
 @author: kyleg
 '''
 
-
-
-
 def SqlUpdateLRSKeys(DBPassword):
+    # Add if exists LocalRoadNumbering
     import datetime
     startDateTime = datetime.datetime.now()
     import pyodbc  # @UnresolvedImport for pydev/eclipse
@@ -35,6 +33,32 @@ def SqlUpdateLRSKeys(DBPassword):
     cursor = cnxn.cursor()
     querystringLRSKEY = """
         USE ROADS
+        
+        select [LRS_COUNTY_PRE],  
+        RTRIM([RD]) as RD_TRIMMED, 
+        RTRIM([STS]) AS STS_TRIMMED, 
+        Count([OBJECTID]) as NAMECOUNT, ROW_NUMBER() over (order by [RD] ASC, STS ASC) AS STATEROWNUM,  
+        ROW_NUMBER() over (PARTITION BY [LRS_COUNTY_PRE] order by [RD] ASC, STS ASC) AS COUNTYROWNUM
+        /*into LOCAL_ROAD_NUMBERING*/
+        from [sde].[ALL_ROAD_CENTERLINES]
+        where [LRS_ROUTE_PREFIX] = 'L' OR [ROUTE_PREFIX_TARGET] in ('6','7','8')
+        group by LRS_COUNTY_PRE, [STS], [RD]
+        order by LRS_COUNTY_PRE ASC, rd ASC, STS ASC
+
+            
+        /*#this update query took 16 seconds to reset all local route numbers*/
+        
+        update [ALL_ROAD_CENTERLINES]
+        set [LRS_ROUTE_NUM_TARGET] = L.COUNTYROWNUM
+        from [ALL_ROAD_CENTERLINES] r
+        inner join LOCAL_ROAD_NUMBERING L
+        ON r.[LRS_COUNTY_PRE] = L.LRS_COUNTY_PRE  
+        AND RTRIM(r.[RD])= L.RD_TRIMMED
+        AND RTRIM(r.[STS])=L.STS_TRIMMED
+        where r.[ROUTE_PREFIX_TARGET] in ('6','7','8')
+        and r.[LRS_ROUTE_NUM_TARGET] != L.COUNTYROWNUM
+
+
         UPDATE [Roads].[sde].[ALL_ROAD_CENTERLINES]
             SET [KDOT_LRS_KEY] = CONCAT([LRS_COUNTY_PRE], [LRS_ROUTE_PREFIX], [LRS_ROUTE_NUM],[LRS_ROUTE_SUFFIX],[LRS_UNIQUE_IDENT], '-',[LRS_DIRECTION]) 
                 WHERE 1=1
@@ -63,7 +87,7 @@ def SqlUpdateLRSKeys(DBPassword):
     cursor.execute("COMMIT")
     cursor.close()
     del cursor
-    print('SQL update query completed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime()))
+    print('SQL update query completed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))
   
 def main():
     #UpdateLRSKeyFieldsSQL()
@@ -76,5 +100,5 @@ if __name__ == '__main__':
     #print(datetime.datetime.now())
     
 else:
-    print("this is the else section")
+    print("Functions from UpdateLRSKey fields script imported to main script")
     

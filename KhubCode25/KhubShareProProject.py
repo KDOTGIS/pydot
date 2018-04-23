@@ -19,7 +19,7 @@ an editable feature service from ArcGIS server.  To accomodate this script, thos
 @author: kyleg
 '''
    
-def ShareProToOnline(KhubPassword):
+def ShareProToOnline(onlinepassword):
     import datetime
     startDateTime = datetime.datetime.now()
     print ("this script takes about 8 minutes")
@@ -34,7 +34,7 @@ def ShareProToOnline(KhubPassword):
     print ("logging in as"+AGOUser)
     try:
         username = AGOUser
-        password = KhubPassword
+        password = onlinepassword
         fileformatDateStr = startDateTime.strftime("%Y%m%d")
         summary = "This project contains maps that link to KDOT SQL Server databases AR58 gdb_prod, AR68 gdb_Dev, and a local file geodatabase copied from DT00ar58 gdb_prod for use on Amazon Servers or otherwise outside the KDOT network. The schema presentation matches the schema for the 1spatial extension.  For the local geodatabse copy, there is one map displaying highway symbols based on the source LRS network route prefix and direction, and another map displaying highway symbols based on the target network classification and direction"
     
