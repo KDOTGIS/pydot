@@ -87,11 +87,11 @@ def RM_Calibrate():
     print ("END_D1_RM_D")
     
     Dissolve_management("START_D1_C Events", localfilegdb+r"\START_D1_C_DX", "LRS_KEY;C_MEAS;KDOT_LRS_KEY", "Distance MIN;Distance MAX;KDOT_STATIC_ID2 FIRST;OBJECTID COUNT;C_MEAS MIN;C_MEAS MAX", "MULTI_PART", "DISSOLVE_LINES")
-    FeatureClassToFeatureClass(localfilegdb+r"\START_D1_C_DX", localfilegdb, "START_D1_C_D", "KDOT_LRS_KEY = LRS_KEY", "#")
+    FeatureClassToFeatureClass(localfilegdb+r"\START_D1_C_DX", localfilegdb, "START_D1_C_D", "SUBSTRING(KDOT_LRS_KEY,0, 9) = SUBSTRING(LRS_KEY,0,9)", "#")
     print ("START_D1_C_D")
     
     Dissolve_management("END_D1_C Events", localfilegdb+r"\END_D1_C_DX", "LRS_KEY;C_MEAS;KDOT_LRS_KEY", "Distance MIN;Distance MAX;KDOT_STATIC_ID2 FIRST;OBJECTID COUNT;C_MEAS MIN;C_MEAS MAX", "MULTI_PART", "DISSOLVE_LINES")
-    FeatureClassToFeatureClass(localfilegdb+r"\END_D1_C_DX", localfilegdb, "END_D1_C_D", "KDOT_LRS_KEY = LRS_KEY", "#")
+    FeatureClassToFeatureClass(localfilegdb+r"\END_D1_C_DX", localfilegdb, "END_D1_C_D", "SUBSTRING(KDOT_LRS_KEY,0, 9) = SUBSTRING(LRS_KEY,0,9)", "#")
     print ("END_D1_C_D")
 
     print('Calibration process completed in {} hours, minutes, seconds.'.format(datetime.datetime.now()-startDateTime))
