@@ -313,45 +313,42 @@ def CalcUsingSQLserver(DBPassword):
                     and substring([COUNTY_LRS],0,10) = substring([KDOT_LRS_KEY],0,10)) em 
                     on r.[KDOT_STATIC_ID2] = em.[KDOT_STATIC_ID2]
 
-            update [sde].[All_Road_Centerlines_D1]
+update [sde].[All_Road_Centerlines_D1]
                 set [county_log_begin] = bm.[C_MEAS]
                 from [sde].[All_Road_Centerlines_D1] r
-                JOIN (select distinct [KDOT_STATIC_ID2], [LRS_KEY], [C_MEAS], [KDOT_LRS_KEY]
+                JOIN (select distinct [FIRST_KDOT_STATIC_ID2], [LRS_KEY], [C_MEAS], [KDOT_LRS_KEY]
                     from [sde].[START_D1_C_D]bm
                     where 1=1
-                    and [LRS_ROUTE_PREFIX] = 'C'
                     and substring([LRS_KEY],0,9) =substring([KDOT_LRS_KEY],0,9)) bm
-                    on r.[KDOT_STATIC_ID2] = bm.[KDOT_STATIC_ID2]
+                    on r.[KDOT_STATIC_ID2] = bm.[FIRST_KDOT_STATIC_ID2]
 
             update [sde].[All_Road_Centerlines_D1]
                 set [county_log_end] = em.[C_MEAS]
                 from [sde].[All_Road_Centerlines_D1] r
-                JOIN (select distinct [KDOT_STATIC_ID2], [LRS_KEY], [C_MEAS], [KDOT_LRS_KEY]
+                JOIN (select distinct [FIRST_KDOT_STATIC_ID2], [LRS_KEY], [C_MEAS], [KDOT_LRS_KEY]
                     from [sde].[END_D1_C_D]em
                     where 1=1
-                    and [LRS_ROUTE_PREFIX] = 'C'
                     and substring([LRS_KEY],0,9) =substring([KDOT_LRS_KEY],0,9)) em
-                    on r.[KDOT_STATIC_ID2] = em.[KDOT_STATIC_ID2]
+                    on r.[KDOT_STATIC_ID2] = em.[FIRST_KDOT_STATIC_ID2]
 
             update [sde].[All_Road_Centerlines_D1]
                 set [county_log_begin] = bm.[RM_MEAS]
                 from [sde].[All_Road_Centerlines_D1] r
-                JOIN (select distinct [KDOT_STATIC_ID2], [LRS_KEY], [RM_MEAS], [KDOT_LRS_KEY]
+                JOIN (select distinct [FIRST_KDOT_STATIC_ID2], [LRS_KEY], [RM_MEAS], [KDOT_LRS_KEY]
                     from [sde].[START_D1_RM_D]bm
                     where 1=1
-                    and [LRS_ROUTE_PREFIX] in ('R', 'M')
                     and substring([LRS_KEY],0,9) =substring([KDOT_LRS_KEY],0,9)) bm
-                    on r.[KDOT_STATIC_ID2] = bm.[KDOT_STATIC_ID2]
+                    on r.[KDOT_STATIC_ID2] = bm.[FIRST_KDOT_STATIC_ID2]
 
             update [sde].[All_Road_Centerlines_D1]
                 set [county_log_end] = em.[RM_MEAS]
                 from [sde].[All_Road_Centerlines_D1] r
-                JOIN (select distinct [KDOT_STATIC_ID2], [LRS_KEY], [RM_MEAS], [KDOT_LRS_KEY]
+                JOIN (select distinct [FIRST_KDOT_STATIC_ID2], [LRS_KEY], [RM_MEAS], [KDOT_LRS_KEY]
                     from [sde].[END_D1_RM_D]em
                     where 1=1
-                    and [LRS_ROUTE_PREFIX] in ('R', 'M')
                     and substring([LRS_KEY],0,9) =substring([KDOT_LRS_KEY],0,9)) em
-                    on r.[KDOT_STATIC_ID2] = em.[KDOT_STATIC_ID2]
+                    on r.[KDOT_STATIC_ID2] = em.[FIRST_KDOT_STATIC_ID2]
+        
         
         
         """
