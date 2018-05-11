@@ -81,6 +81,9 @@ def SqlUpdateLRSKeys(DBPassword):
                 WHERE 1=1
                 AND LRS_ROUTE_PREFIX in ('C')
                 AND [KDOT_LRS_KEY]<> CONCAT([LRS_URBAN_PRE], [LRS_ROUTE_PREFIX], [LRS_ROUTE_NUM],[LRS_ROUTE_SUFFIX],[LRS_UNIQUE_IDENT],[LRS_ADMO],[KDOT_DIRECTION_CALC])
+       
+        UPDATE [sde].[ALL_ROAD_CENTERLINES_D1]
+            set [KDOT_STATIC_ID2] = [OBJECTID]
         """
 
     cursor.execute(querystringLRSKEY) 

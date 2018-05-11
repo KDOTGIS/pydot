@@ -3,7 +3,7 @@ Created on Mar 6, 2018
 
 @author: kyleg
 '''
-devorprod = 'prod'  #choose prod or dev
+devorprod = 'dev'  #choose prod or dev
 localProProjectPath = r"C:\Users\kyleg\Documents\ArcGIS\Projects\KhubDataCleanup251"
 localProProjectName = r"KhubDataCleanup25.aprx"
 localProFileGDBWorkspace = r"C:\gisdata\Roads"
@@ -15,6 +15,8 @@ dbownername = "SDE"
 countylines = r"sdeprod_shared.sde\SHARED.COUNTY_LINES"
 prodSqlDSN = 'dt00ar58_gdb_prod_sde_roads'
 devSqlDSN = 'dt00ar68_gdb_dev_sde_roads'
+RuralClassifiedRoutes = "RM_Routes"
+UrbanClassifiedRoutes = "Nusys"
 Cmlrs = r'CMLRS_2017'
 RHXML = r'KHUB20.XML'
 AGOUser =r"kyle.gonterwitz_KSDOT"

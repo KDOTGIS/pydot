@@ -27,12 +27,13 @@ def CollectPasswords():
 
 def main():
     thesecret = CollectPasswords()
-    KhubCode25.KhubUpdateLRSKeyFields.SqlUpdateLRSKeys(thesecret[1])
-    KhubCode25.KhubCalibrateSourceToControl.StateHighwayCalibrate()
-    KhubCode25.KhubCalibrateSourceToControl.CalcUsingSQLserver(thesecret[1])
-    KhubCode25.KhubUpdateFileGDB.UpdateLocalFileGDB()
-    KhubCode25.KhubUpdateFileGDB.UpdateProjectDataSources()
-    KhubCode25.KhubShareProProject.ShareProToOnline(thesecret[0])
+    #KhubCode25.KhubUpdateLRSKeyFields.SqlUpdateLRSKeys(thesecret[1])
+    #KhubCode25.KhubCalibrateSourceToControl.StateHighwayCalibrate()
+    KhubCode25.KhubCalibrateSourceToControl.RM_Calibrate()
+    #KhubCode25.KhubCalibrateSourceToControl.CalcUsingSQLserver(thesecret[1])
+    #KhubCode25.KhubUpdateFileGDB.UpdateLocalFileGDB()
+    #KhubCode25.KhubUpdateFileGDB.UpdateProjectDataSources()
+    #KhubCode25.KhubShareProProject.ShareProToOnline(thesecret[0])
     print ("all done")
     
 main()
